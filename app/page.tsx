@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useConnection, useWalletClient } from "wagmi";
 import { ConnectButton } from "@/components/ConnectButton";
 import {
@@ -112,6 +112,18 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [respTab, setRespTab] = useState<"body" | "headers" | "receipt">("body");
+  const probeSecRef = useRef<HTMLElement>(null);
+  const paySecRef = useRef<HTMLElement>(null);
+
+  // Scroll newly-revealed results into view so you don't have to hunt for them.
+  useEffect(() => {
+    if (probe)
+      probeSecRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [probe]);
+  useEffect(() => {
+    if (pay)
+      paySecRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [pay]);
 
   const connected = !!address;
   const wrongChain = connected && chainId !== CHAIN_ID;
@@ -324,7 +336,7 @@ export default function Home() {
 
         {/* Probe result — the 402 challenge */}
         {probe && (
-          <section className="mt-6 animate-in">
+          <section ref={probeSecRef} className="mt-6 animate-in">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">1 · Payment challenge</span>
               <StatusBar status={probe.status} ok={probe.ok} ms={probeMs} />
@@ -441,7 +453,7 @@ export default function Home() {
 
         {/* Pay result — the unlocked response */}
         {pay && (
-          <section className="mt-6 animate-in">
+          <section ref={paySecRef} className="mt-6 animate-in">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">2 · Settled response</span>
               <StatusBar status={pay.status} ok={pay.ok} ms={payMs} />

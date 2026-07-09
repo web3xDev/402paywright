@@ -10,8 +10,8 @@ import { wagmiAdapter, projectId } from "@/lib/wagmi";
 const metadata = {
   name: "Paywright",
   description: "Test and inspect any x402 endpoint — the Postman for x402.",
-  url: "https://paywright.dev",
-  icons: ["https://paywright.dev/favicon.ico"],
+  url: "https://paywright.xyz",
+  icons: ["https://paywright.xyz/favicon.ico"],
 };
 
 // Create the AppKit modal once (dark, neon accent, wallet-only).

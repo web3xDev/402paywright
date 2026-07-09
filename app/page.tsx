@@ -11,16 +11,10 @@ import {
   type RequestConfig,
 } from "@/lib/x402-client";
 import { CHAIN_ID, FAUCET_URL } from "@/lib/constants";
+import { MethodSelect } from "@/components/MethodSelect";
+import { Footer } from "@/components/Footer";
 
 const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
-
-const METHOD_COLOR: Record<string, string> = {
-  GET: "text-ok",
-  POST: "text-accent-2",
-  PUT: "text-blue",
-  DELETE: "text-red",
-  PATCH: "text-purple",
-};
 
 function short(addr: string): string {
   return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
@@ -169,9 +163,9 @@ export default function Home() {
   const req = summarize(probe?.requirements);
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4">
         <div className="flex items-center gap-2 text-lg font-bold tracking-tight">
           <span className="grid h-6 w-9 place-items-center rounded bg-accent font-mono text-xs font-bold text-[#1a0e08]">
             402
@@ -183,7 +177,7 @@ export default function Home() {
 
       <div className="h-px w-full bg-[var(--border)]" />
 
-      <main className="mx-auto max-w-5xl px-5 pb-24 pt-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-24 pt-6">
         <div className="mb-5">
           <h1 className="text-xl font-semibold tracking-tight">
             Test any <span className="text-accent">x402</span> endpoint
@@ -197,17 +191,7 @@ export default function Home() {
         {/* Request builder */}
         <div className="panel p-3">
           <div className="flex flex-col gap-2 sm:flex-row">
-            <select
-              value={method}
-              onChange={(e) => setMethod(e.target.value)}
-              className={`field px-3 py-2.5 font-mono text-sm font-semibold sm:w-28 ${METHOD_COLOR[method] ?? ""}`}
-            >
-              {METHODS.map((m) => (
-                <option key={m} value={m} className="text-foreground">
-                  {m}
-                </option>
-              ))}
-            </select>
+            <MethodSelect value={method} onChange={setMethod} methods={METHODS} />
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -392,6 +376,8 @@ export default function Home() {
           </p>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

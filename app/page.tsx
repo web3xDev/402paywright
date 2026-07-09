@@ -10,8 +10,9 @@ import {
   type PayResult,
   type RequestConfig,
 } from "@/lib/x402-client";
-import { CHAIN_ID, FAUCET_URL } from "@/lib/constants";
+import { CHAIN_ID, FAUCET_URL, ACTIVE_CHAIN } from "@/lib/constants";
 import { MethodSelect } from "@/components/MethodSelect";
+import { ChainDropdown } from "@/components/ChainDropdown";
 import { Footer } from "@/components/Footer";
 
 const METHODS = ["GET", "POST"];
@@ -168,7 +169,16 @@ export default function Home() {
           </span>
           Paywright
         </div>
-        <ConnectButton />
+        <div className="flex items-center gap-2">
+          {ACTIVE_CHAIN.testnet && (
+            <span className="hidden items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent-2 sm:inline-flex">
+              <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent-2" />
+              testnet
+            </span>
+          )}
+          <ChainDropdown />
+          <ConnectButton />
+        </div>
       </header>
 
       <div className="h-px w-full bg-[var(--border)]" />

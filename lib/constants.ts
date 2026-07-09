@@ -15,9 +15,17 @@ export const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 /** Where to grab testnet USDC to pay with. */
 export const FAUCET_URL = "https://faucet.circle.com/";
 
+/** Base Sepolia block explorer — settlement tx links. */
+export const EXPLORER_TX = "https://sepolia.basescan.org/tx/";
+
 /** A few known x402-gated endpoints to try in one click. */
 export const SAMPLE_ENDPOINTS: { label: string; url: string; method: string }[] =
   [
+    {
+      label: "Flash402 · currency API",
+      url: "https://flash402.xyz/api/gw/d1425bbf",
+      method: "GET",
+    },
     {
       label: "x402.org demo",
       url: "https://x402.org/protected",

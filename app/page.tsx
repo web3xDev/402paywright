@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useConnection, useWalletClient } from "wagmi";
 import { ConnectButton } from "@/components/ConnectButton";
 import {
@@ -10,7 +10,14 @@ import {
   type PayResult,
   type RequestConfig,
 } from "@/lib/x402-client";
-import { CHAIN_ID, FAUCET_URL, ACTIVE_CHAIN } from "@/lib/constants";
+import {
+  CHAIN_ID,
+  FAUCET_URL,
+  ACTIVE_CHAIN,
+  SAMPLE_ENDPOINTS,
+  EXPLORER_TX,
+} from "@/lib/constants";
+import { readUsdcBalance, formatUsdc } from "@/lib/balance";
 import { MethodSelect } from "@/components/MethodSelect";
 import { ChainDropdown } from "@/components/ChainDropdown";
 import { Footer } from "@/components/Footer";
@@ -103,6 +110,8 @@ export default function Home() {
   const [probeMs, setProbeMs] = useState<number | null>(null);
   const [payMs, setPayMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState<bigint | null>(null);
+  const [respTab, setRespTab] = useState<"body" | "headers" | "receipt">("body");
 
   const connected = !!address;
   const wrongChain = connected && chainId !== CHAIN_ID;
@@ -121,6 +130,21 @@ export default function Home() {
   }, [url, method, headersText, body]);
 
   const urlValid = /^https?:\/\/.+/.test(config.url);
+
+  // Read the connected wallet's USDC balance (for display + pre-flight check).
+  useEffect(() => {
+    if (!address || chainId !== CHAIN_ID) {
+      setBalance(null);
+      return;
+    }
+    let cancelled = false;
+    readUsdcBalance(address)
+      .then((b) => !cancelled && setBalance(b))
+      .catch(() => !cancelled && setBalance(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [address, chainId]);
 
   async function onSend() {
     if (!urlValid) return;
@@ -143,8 +167,19 @@ export default function Home() {
 
   async function onPay() {
     if (!walletClient) return;
+    // Pre-flight: enough USDC to cover the call?
+    const s = summarize(probe?.requirements);
+    if (balance != null && s?.amount && /^\d+$/.test(s.amount)) {
+      if (balance < BigInt(s.amount)) {
+        setError(
+          `Insufficient USDC — you have ${formatUsdc(balance)} but this call costs ${s.usdc ?? s.amount}.`,
+        );
+        return;
+      }
+    }
     setError(null);
     setPay(null);
+    setRespTab("body");
     setPaying(true);
     const t0 = Date.now();
     try {
@@ -159,6 +194,9 @@ export default function Home() {
   }
 
   const req = summarize(probe?.requirements);
+  const receipt = (pay?.receipt ?? null) as Record<string, unknown> | null;
+  const txHash =
+    typeof receipt?.transaction === "string" ? receipt.transaction : null;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -259,6 +297,23 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs text-muted">
+          <span>Try:</span>
+          {SAMPLE_ENDPOINTS.map((s) => (
+            <button
+              key={s.url}
+              type="button"
+              onClick={() => {
+                setMethod(s.method);
+                setUrl(s.url);
+              }}
+              className="rounded-full border border-[var(--border)] px-2.5 py-1 transition-colors duration-150 hover:border-accent/50 hover:text-foreground"
+            >
+              {s.label}
+            </button>
+          ))}
         </div>
 
         {error && (
@@ -371,6 +426,14 @@ export default function Home() {
                 >
                   Need testnet USDC?
                 </a>
+                {connected && !wrongChain && balance != null && (
+                  <span className="text-xs text-muted">
+                    Balance:{" "}
+                    <span className="font-mono text-foreground">
+                      {formatUsdc(balance)} USDC
+                    </span>
+                  </span>
+                )}
               </div>
             )}
           </section>
@@ -394,18 +457,42 @@ export default function Home() {
                 {pay.error}
               </p>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <span className="text-xs text-muted">response body</span>
-                  <div className="mt-1">
-                    <Json value={pay.body} />
-                  </div>
+              <div>
+                {txHash && (
+                  <a
+                    href={`${EXPLORER_TX}${txHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent transition-colors duration-150 hover:border-accent/50"
+                  >
+                    {short(txHash)} · view settlement ↗
+                  </a>
+                )}
+                <div className="flex gap-1 border-b border-[var(--border)]">
+                  {(["body", "headers", "receipt"] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setRespTab(t)}
+                      className={`-mb-px border-b-2 px-3 py-1.5 text-xs capitalize transition-colors duration-150 ${
+                        respTab === t
+                          ? "border-accent text-foreground"
+                          : "border-transparent text-muted hover:text-foreground"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <span className="text-xs text-muted">settlement receipt</span>
-                  <div className="mt-1">
-                    <Json value={pay.receipt ?? "(no payment-response header)"} />
-                  </div>
+                <div className="mt-2">
+                  <Json
+                    value={
+                      respTab === "body"
+                        ? pay.body
+                        : respTab === "headers"
+                          ? pay.headers
+                          : (pay.receipt ?? "(no payment-response header)")
+                    }
+                  />
                 </div>
               </div>
             )}

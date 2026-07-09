@@ -14,6 +14,14 @@ import { CHAIN_ID, FAUCET_URL } from "@/lib/constants";
 
 const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
+const METHOD_COLOR: Record<string, string> = {
+  GET: "text-ok",
+  POST: "text-accent-2",
+  PUT: "text-blue",
+  DELETE: "text-red",
+  PATCH: "text-purple",
+};
+
 function short(addr: string): string {
   return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
 }
@@ -57,18 +65,27 @@ function Json({ value }: { value: unknown }) {
   );
 }
 
-function StatusPill({ status, ok }: { status: number; ok: boolean }) {
+function StatusBar({
+  status,
+  ok,
+  ms,
+}: {
+  status: number;
+  ok: boolean;
+  ms?: number | null;
+}) {
   const tone =
     status === 402
-      ? "text-amber bg-amber/10 ring-amber/30"
+      ? "text-accent-2 bg-accent-2/10 ring-accent-2/30"
       : ok
-        ? "text-neon-2 bg-neon-2/10 ring-neon-2/30"
+        ? "text-ok bg-ok/10 ring-ok/30"
         : "text-red bg-red/10 ring-red/30";
   return (
-    <span
-      className={`rounded-md px-2 py-0.5 font-mono text-xs font-semibold ring-1 ${tone}`}
-    >
-      {status || "ERR"}
+    <span className="inline-flex items-center gap-2 font-mono text-xs">
+      <span className={`rounded px-2 py-0.5 font-semibold ring-1 ${tone}`}>
+        {status || "ERR"}
+      </span>
+      {ms != null && <span className="text-muted">{ms} ms</span>}
     </span>
   );
 }
@@ -87,6 +104,8 @@ export default function Home() {
   const [paying, setPaying] = useState(false);
   const [probe, setProbe] = useState<ProbeResult | null>(null);
   const [pay, setPay] = useState<PayResult | null>(null);
+  const [probeMs, setProbeMs] = useState<number | null>(null);
+  const [payMs, setPayMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const connected = !!address;
@@ -112,9 +131,13 @@ export default function Home() {
     setError(null);
     setProbe(null);
     setPay(null);
+    setPayMs(null);
     setProbing(true);
+    const t0 = Date.now();
     try {
-      setProbe(await probeX402(config));
+      const r = await probeX402(config);
+      setProbeMs(Date.now() - t0);
+      setProbe(r);
     } catch (e) {
       setError(
         e instanceof Error
@@ -131,8 +154,11 @@ export default function Home() {
     setError(null);
     setPay(null);
     setPaying(true);
+    const t0 = Date.now();
     try {
-      setPay(await payX402(walletClient, config));
+      const r = await payX402(walletClient, config);
+      setPayMs(Date.now() - t0);
+      setPay(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -145,20 +171,22 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
-        <div className="flex items-center gap-2 font-mono text-lg font-bold">
-          <span className="grid h-7 w-7 place-items-center rounded-md bg-[#0a0d14] ring-1 ring-neon/40">
-            ⚡
+      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-2 text-lg font-bold tracking-tight">
+          <span className="grid h-6 w-9 place-items-center rounded bg-accent font-mono text-xs font-bold text-[#1a0e08]">
+            402
           </span>
-          x402<span className="text-neon">playground</span>
+          Paywright
         </div>
         <ConnectButton />
       </header>
 
-      <main className="mx-auto max-w-5xl px-5 pb-24">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Test any <span className="text-neon">x402</span> endpoint
+      <div className="h-px w-full bg-[var(--border)]" />
+
+      <main className="mx-auto max-w-5xl px-5 pb-24 pt-6">
+        <div className="mb-5">
+          <h1 className="text-xl font-semibold tracking-tight">
+            Test any <span className="text-accent">x402</span> endpoint
           </h1>
           <p className="mt-1 text-sm text-muted">
             Send a request, decode the 402 payment challenge, pay in USDC, and
@@ -167,15 +195,15 @@ export default function Home() {
         </div>
 
         {/* Request builder */}
-        <div className="card neon-border rounded-2xl p-4">
+        <div className="panel p-3">
           <div className="flex flex-col gap-2 sm:flex-row">
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value)}
-              className="rounded-lg border border-[var(--border)] bg-black/30 px-3 py-2.5 font-mono text-sm outline-none focus:border-neon sm:w-28"
+              className={`field px-3 py-2.5 font-mono text-sm font-semibold sm:w-28 ${METHOD_COLOR[method] ?? ""}`}
             >
               {METHODS.map((m) => (
-                <option key={m} value={m}>
+                <option key={m} value={m} className="text-foreground">
                   {m}
                 </option>
               ))}
@@ -185,12 +213,12 @@ export default function Home() {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSend()}
               placeholder="https://api.example.com/paid-endpoint"
-              className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-black/30 px-3 py-2.5 font-mono text-sm outline-none placeholder:text-muted focus:border-neon"
+              className="field min-w-0 flex-1 px-3 py-2.5 font-mono text-sm placeholder:text-muted"
             />
             <button
               onClick={onSend}
               disabled={!urlValid || probing}
-              className="btn-neon rounded-lg px-6 py-2.5 text-sm font-semibold disabled:opacity-40"
+              className="btn-primary px-6 py-2.5 text-sm"
             >
               {probing ? "Sending…" : "Send"}
             </button>
@@ -198,12 +226,12 @@ export default function Home() {
 
           <button
             onClick={() => setShowAdvanced((s) => !s)}
-            className="mt-3 text-xs text-muted transition hover:text-foreground"
+            className="mt-2.5 text-xs text-muted transition hover:text-foreground"
           >
             {showAdvanced ? "▾" : "▸"} Headers &amp; body
           </button>
           {showAdvanced && (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs text-muted">
                   Headers (one <span className="font-mono">Key: Value</span> per line)
@@ -213,7 +241,7 @@ export default function Home() {
                   onChange={(e) => setHeadersText(e.target.value)}
                   rows={4}
                   placeholder={"Authorization: Bearer …\nContent-Type: application/json"}
-                  className="w-full rounded-lg border border-[var(--border)] bg-black/30 p-2.5 font-mono text-xs outline-none placeholder:text-muted focus:border-neon"
+                  className="field w-full p-2.5 font-mono text-xs placeholder:text-muted"
                 />
               </div>
               <div>
@@ -225,7 +253,7 @@ export default function Home() {
                   onChange={(e) => setBody(e.target.value)}
                   rows={4}
                   placeholder={'{ "key": "value" }'}
-                  className="w-full rounded-lg border border-[var(--border)] bg-black/30 p-2.5 font-mono text-xs outline-none placeholder:text-muted focus:border-neon"
+                  className="field w-full p-2.5 font-mono text-xs placeholder:text-muted"
                 />
               </div>
             </div>
@@ -241,42 +269,38 @@ export default function Home() {
         {/* Probe result — the 402 challenge */}
         {probe && (
           <section className="mt-6">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">1 · Payment challenge</span>
-              <StatusPill status={probe.status} ok={probe.ok} />
+              <StatusBar status={probe.status} ok={probe.ok} ms={probeMs} />
               {probe.isX402 ? (
-                <span className="rounded-md bg-neon/10 px-2 py-0.5 text-xs font-medium text-neon ring-1 ring-neon/30">
+                <span className="rounded bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-accent/30">
                   valid x402
                 </span>
               ) : probe.status === 402 ? (
-                <span className="rounded-md bg-amber/10 px-2 py-0.5 text-xs text-amber ring-1 ring-amber/30">
+                <span className="rounded bg-accent-2/10 px-2 py-0.5 text-xs text-accent-2 ring-1 ring-accent-2/30">
                   402 but no requirements header
                 </span>
               ) : (
-                <span className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-muted ring-1 ring-[var(--border)]">
+                <span className="rounded bg-white/5 px-2 py-0.5 text-xs text-muted ring-1 ring-[var(--border)]">
                   not an x402 challenge
                 </span>
               )}
             </div>
 
             {req && (
-              <div className="card mb-3 grid gap-x-6 gap-y-2 rounded-xl p-4 text-sm sm:grid-cols-2">
+              <div className="panel mb-3 grid gap-x-6 gap-y-2 p-4 text-sm sm:grid-cols-2">
                 <Field label="scheme" value={req.scheme} mono />
                 <Field label="network" value={req.network} mono />
                 <Field
                   label="amount"
                   value={
-                    req.usdc
-                      ? `${req.amount}  (≈ ${req.usdc} USDC)`
-                      : req.amount
+                    req.usdc ? `${req.amount}  (≈ ${req.usdc} USDC)` : req.amount
                   }
                   mono
                 />
                 <Field label="pay to" value={req.payTo && short(req.payTo)} mono />
                 <Field label="asset" value={req.asset && short(req.asset)} mono />
-                {req.description && (
-                  <Field label="note" value={req.description} />
-                )}
+                {req.description && <Field label="note" value={req.description} />}
               </div>
             )}
 
@@ -298,14 +322,14 @@ export default function Home() {
                     Connect a wallet to pay and unlock.
                   </span>
                 ) : wrongChain ? (
-                  <span className="text-sm text-amber">
+                  <span className="text-sm text-accent-2">
                     Switch to Base Sepolia to pay.
                   </span>
                 ) : (
                   <button
                     onClick={onPay}
                     disabled={paying}
-                    className="btn-neon inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold disabled:opacity-40"
+                    className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm"
                   >
                     {paying && (
                       <span className="h-3.5 w-3.5 animate-spin-slow rounded-full border-2 border-current border-t-transparent" />
@@ -329,11 +353,11 @@ export default function Home() {
         {/* Pay result — the unlocked response */}
         {pay && (
           <section className="mt-6">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">2 · Settled response</span>
-              <StatusPill status={pay.status} ok={pay.ok} />
+              <StatusBar status={pay.status} ok={pay.ok} ms={payMs} />
               {pay.receipt != null && (
-                <span className="rounded-md bg-neon-2/10 px-2 py-0.5 text-xs font-medium text-neon-2 ring-1 ring-neon-2/30">
+                <span className="rounded bg-ok/10 px-2 py-0.5 text-xs font-medium text-ok ring-1 ring-ok/30">
                   settled onchain
                 </span>
               )}

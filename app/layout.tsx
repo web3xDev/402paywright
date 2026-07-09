@@ -9,9 +9,9 @@ import { wagmiConfig } from "@/lib/wagmi";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const TITLE = "x402 Playground — test & inspect any x402 endpoint";
+const TITLE = "Paywright — the Postman for x402";
 const DESCRIPTION =
-  "Paste an x402 endpoint, connect a wallet, and run the full 402 → sign → 200 flow. Decode payment requirements, pay in USDC, and inspect the settlement receipt. The Postman for x402.";
+  "Paste an x402 endpoint, connect a wallet, and run the full 402 → sign → 200 flow. Decode payment requirements, pay in USDC, and inspect the settlement receipt.";
 
 export const metadata: Metadata = {
   title: TITLE,

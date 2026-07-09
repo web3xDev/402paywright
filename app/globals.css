@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
-/* x402 Playground — dark, developer-tool aesthetic. */
+/*
+ * Paywright — the Postman for x402.
+ * A developer tool aesthetic: warm-neutral dark, orange accent (HTTP-client
+ * coded), crisp borders, method color-coding, no marketing glow.
+ */
 :root {
-  --background: #05060a;
-  --foreground: #e8ecf4;
-  --muted: #8b94a7;
-  --neon: #22d3ee; /* cyan */
-  --neon-2: #00ffa3; /* green */
-  --amber: #febc2e;
-  --red: #ff5f57;
-  --card: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.08);
+  --background: #16151a;
+  --panel: #1d1c22;
+  --foreground: #ececf1;
+  --muted: #9a9aa7;
+  --accent: #ff6c37; /* orange — primary */
+  --accent-2: #f5a623; /* amber */
+  --ok: #3ecf8e; /* green — GET / success */
+  --red: #f26d6d;
+  --blue: #4a9df8;
+  --purple: #b07cf7;
+  --border: rgba(255, 255, 255, 0.09);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-panel: var(--panel);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-neon: var(--neon);
-  --color-neon-2: var(--neon-2);
-  --color-amber: var(--amber);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-ok: var(--ok);
   --color-red: var(--red);
+  --color-blue: var(--blue);
+  --color-purple: var(--purple);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -41,48 +50,53 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.card {
-  background: var(--card);
+/* Panels: flat, crisp, tool-like (no glow, small radius). */
+.panel {
+  background: var(--panel);
   border: 1px solid var(--border);
-  backdrop-filter: blur(6px);
+  border-radius: 10px;
 }
 
-.neon-border {
+.field {
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border);
-  box-shadow:
-    0 0 0 1px rgba(34, 211, 238, 0.04),
-    0 0 40px -12px rgba(34, 211, 238, 0.25);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+.field:focus {
+  border-color: var(--accent);
 }
 
-.btn-neon {
-  background: linear-gradient(120deg, var(--neon), var(--neon-2));
-  color: #04121a;
-  box-shadow: 0 0 30px -6px rgba(0, 255, 163, 0.5);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+.btn-primary {
+  background: var(--accent);
+  color: #1a0e08;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: filter 0.12s ease, transform 0.12s ease;
 }
-.btn-neon:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 44px -4px rgba(0, 255, 163, 0.7);
+.btn-primary:not(:disabled):hover {
+  filter: brightness(1.08);
 }
-.btn-neon:disabled {
-  box-shadow: none;
+.btn-primary:disabled {
   opacity: 0.4;
 }
 
 .btn-ghost {
   border: 1px solid var(--border);
-  transition: border-color 0.15s ease, background 0.15s ease;
+  border-radius: 8px;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 .btn-ghost:not(:disabled):hover {
-  border-color: rgba(34, 211, 238, 0.5);
-  background: rgba(34, 211, 238, 0.06);
+  border-color: rgba(255, 108, 55, 0.5);
+  background: rgba(255, 108, 55, 0.06);
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 163, 0.6); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 255, 163, 0); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
-.animate-pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
 
 @keyframes spin {
   to { transform: rotate(360deg); }

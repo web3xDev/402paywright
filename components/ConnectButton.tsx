@@ -16,7 +16,7 @@ export function ConnectButton() {
     return (
       <button
         onClick={() => open()}
-        className="btn-neon rounded-lg px-4 py-2 text-sm font-semibold"
+        className="btn-primary px-4 py-2 text-sm"
       >
         Connect wallet
       </button>
@@ -30,17 +30,17 @@ export function ConnectButton() {
       {wrongChain && (
         <button
           onClick={() => open({ view: "Networks" })}
-          className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-400"
+          className="rounded-lg border border-accent-2/50 bg-accent-2/10 px-3 py-2 text-xs font-medium text-accent-2"
         >
           Switch to Base Sepolia
         </button>
       )}
       <button
         onClick={() => open({ view: "Account" })}
-        className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-medium transition hover:border-neon/40"
+        className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium transition hover:border-accent/40"
         aria-label="Wallet account"
       >
-        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-neon-2" />
+        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ok" />
         <span className="font-mono">{short(address)}</span>
       </button>
     </div>

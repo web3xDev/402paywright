@@ -37,7 +37,7 @@ export function ConnectButton() {
       )}
       <button
         onClick={() => open({ view: "Account" })}
-        className="flex h-9 items-center gap-2 rounded-lg border border-[var(--border)] px-3 text-sm font-medium transition hover:border-accent/40"
+        className="btn-ghost flex h-9 items-center gap-2 px-3 text-sm font-medium"
         aria-label="Wallet account"
       >
         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ok" />

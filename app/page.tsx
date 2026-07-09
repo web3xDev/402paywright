@@ -484,15 +484,17 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="mt-2">
-                  <Json
-                    value={
-                      respTab === "body"
-                        ? pay.body
-                        : respTab === "headers"
-                          ? pay.headers
-                          : (pay.receipt ?? "(no payment-response header)")
-                    }
-                  />
+                  <div key={respTab} className="animate-fade">
+                    <Json
+                      value={
+                        respTab === "body"
+                          ? pay.body
+                          : respTab === "headers"
+                            ? pay.headers
+                            : (pay.receipt ?? "(no payment-response header)")
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             )}

@@ -20,7 +20,11 @@ export function ChainDropdown() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="btn-ghost inline-flex h-9 items-center gap-2 px-3 text-sm font-medium"
+        className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors duration-150 ${
+          open
+            ? "border-accent"
+            : "border-[var(--border)] hover:border-accent/50 hover:bg-accent/[0.06]"
+        }`}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-ok" />
         <span className="hidden sm:inline">{ACTIVE_CHAIN.label}</span>

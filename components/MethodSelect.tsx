@@ -5,9 +5,6 @@ import { useEffect, useRef, useState } from "react";
 export const METHOD_COLOR: Record<string, string> = {
   GET: "text-ok",
   POST: "text-accent-2",
-  PUT: "text-blue",
-  DELETE: "text-red",
-  PATCH: "text-purple",
 };
 
 export function MethodSelect({

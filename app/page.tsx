@@ -14,7 +14,7 @@ import { CHAIN_ID, FAUCET_URL } from "@/lib/constants";
 import { MethodSelect } from "@/components/MethodSelect";
 import { Footer } from "@/components/Footer";
 
-const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"];
+const METHODS = ["GET", "POST"];
 
 function short(addr: string): string {
   return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;

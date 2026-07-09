@@ -122,22 +122,39 @@ async function proxyFetch(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response> {
-  const url =
-    typeof input === "string"
-      ? input
-      : input instanceof URL
-        ? input.toString()
-        : input.url;
-  const body = typeof init?.body === "string" ? init.body : undefined;
+  let url: string;
+  let reqMethod: string | undefined;
+  let reqHeaders: Record<string, string> = {};
+  let reqBody: string | undefined;
+
+  // The x402 client retries by passing a Request object (with the payment
+  // header on it), not via `init` — so pull method/headers/body off the
+  // Request too, then let an explicit `init` override.
+  if (typeof input === "string") {
+    url = input;
+  } else if (input instanceof URL) {
+    url = input.toString();
+  } else {
+    url = input.url;
+    reqMethod = input.method;
+    reqHeaders = normalizeHeaders(input.headers);
+    if (input.body) {
+      try {
+        reqBody = await input.clone().text();
+      } catch {
+        /* body not readable — leave undefined */
+      }
+    }
+  }
+
+  const method = (init?.method ?? reqMethod ?? "GET").toUpperCase();
+  const headers = { ...reqHeaders, ...normalizeHeaders(init?.headers) };
+  const body = typeof init?.body === "string" ? init.body : reqBody;
+
   return fetch("/api/proxy", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      url,
-      method: (init?.method ?? "GET").toUpperCase(),
-      headers: normalizeHeaders(init?.headers),
-      body,
-    }),
+    body: JSON.stringify({ url, method, headers, body }),
   });
 }
 

@@ -32,7 +32,7 @@ export function MethodSelect({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`field flex w-full items-center justify-between px-3 py-2.5 font-mono text-sm font-semibold ${METHOD_COLOR[value] ?? ""}`}
+        className={`field flex h-9 w-full items-center justify-between px-3 font-mono text-sm font-semibold ${METHOD_COLOR[value] ?? ""}`}
       >
         {value}
         <svg

@@ -170,12 +170,6 @@ export default function Home() {
           Paywright
         </div>
         <div className="flex items-center gap-2">
-          {ACTIVE_CHAIN.testnet && (
-            <span className="hidden items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent-2 sm:inline-flex">
-              <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent-2" />
-              testnet
-            </span>
-          )}
           <ChainDropdown />
           <ConnectButton />
         </div>
@@ -185,9 +179,17 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-24 pt-6">
         <div className="mb-5">
-          <h1 className="text-xl font-semibold tracking-tight">
-            Test any <span className="text-accent">x402</span> endpoint
-          </h1>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-xl font-semibold tracking-tight">
+              Test any <span className="text-accent">x402</span> endpoint
+            </h1>
+            {ACTIVE_CHAIN.testnet && (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent-2">
+                <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent-2" />
+                testnet
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted">
             Send a request, decode the 402 payment challenge, pay in USDC, and
             inspect the settled response. The Postman for x402.
@@ -203,12 +205,12 @@ export default function Home() {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSend()}
               placeholder="https://api.example.com/paid-endpoint"
-              className="field min-w-0 flex-1 px-3 py-2.5 font-mono text-sm placeholder:text-muted"
+              className="field h-9 min-w-0 flex-1 px-3 font-mono text-sm placeholder:text-muted"
             />
             <button
               onClick={onSend}
               disabled={!urlValid || probing}
-              className="btn-primary px-6 py-2.5 text-sm"
+              className="btn-primary inline-flex h-9 items-center justify-center px-6 text-sm"
             >
               {probing ? "Sending…" : "Send"}
             </button>

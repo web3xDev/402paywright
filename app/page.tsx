@@ -92,6 +92,7 @@ export default function Home() {
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showRaw, setShowRaw] = useState(false);
   const [headersText, setHeadersText] = useState("");
   const [body, setBody] = useState("");
 
@@ -268,7 +269,7 @@ export default function Home() {
 
         {/* Probe result — the 402 challenge */}
         {probe && (
-          <section className="mt-6">
+          <section className="mt-6 animate-in">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">1 · Payment challenge</span>
               <StatusBar status={probe.status} ok={probe.ok} ms={probeMs} />
@@ -304,15 +305,40 @@ export default function Home() {
               </div>
             )}
 
-            <details className="text-xs text-muted">
-              <summary className="cursor-pointer select-none py-1">
+            <div>
+              <button
+                onClick={() => setShowRaw((s) => !s)}
+                className="flex items-center gap-1.5 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
+              >
+                <svg
+                  className={`h-3 w-3 transition-transform duration-150 ${showRaw ? "rotate-90" : ""}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
                 Raw challenge &amp; response
-              </summary>
-              <div className="mt-2 grid gap-2">
-                <span className="text-xs text-muted">requirements</span>
-                <Json value={probe.requirements ?? probe.body} />
+              </button>
+              <div
+                className={`grid transition-all duration-150 ease-out ${
+                  showRaw
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="mt-2 grid gap-2">
+                    <span className="text-xs text-muted">requirements</span>
+                    <Json value={probe.requirements ?? probe.body} />
+                  </div>
+                </div>
               </div>
-            </details>
+            </div>
 
             {/* Pay step */}
             {probe.isX402 && (
@@ -352,7 +378,7 @@ export default function Home() {
 
         {/* Pay result — the unlocked response */}
         {pay && (
-          <section className="mt-6">
+          <section className="mt-6 animate-in">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">2 · Settled response</span>
               <StatusBar status={pay.status} ok={pay.ok} ms={payMs} />

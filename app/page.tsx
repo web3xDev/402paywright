@@ -133,11 +133,7 @@ export default function Home() {
       setProbeMs(Date.now() - t0);
       setProbe(r);
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? `${e.message} — the endpoint may block cross-origin requests (CORS).`
-          : String(e),
-      );
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setProbing(false);
     }

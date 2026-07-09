@@ -99,12 +99,54 @@ function safeJson(text: string): unknown {
   }
 }
 
+function normalizeHeaders(h?: HeadersInit): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!h) return out;
+  if (h instanceof Headers) {
+    h.forEach((v, k) => (out[k] = v));
+  } else if (Array.isArray(h)) {
+    for (const [k, v] of h) out[k] = v;
+  } else {
+    Object.assign(out, h);
+  }
+  return out;
+}
+
+/**
+ * fetch() that routes through our same-origin /api/proxy so the browser can
+ * reach any x402 endpoint without CORS. Passed to both the probe and (via
+ * wrapFetchWithPayment) the paid retry, so the whole HTTP flow avoids CORS
+ * while payment signing stays client-side.
+ */
+async function proxyFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.toString()
+        : input.url;
+  const body = typeof init?.body === "string" ? init.body : undefined;
+  return fetch("/api/proxy", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      url,
+      method: (init?.method ?? "GET").toUpperCase(),
+      headers: normalizeHeaders(init?.headers),
+      body,
+    }),
+  });
+}
+
 /**
  * Unpaid probe: send the request and read the 402 challenge. No wallet needed.
  * This is the "inspect what the endpoint requires" step.
  */
 export async function probeX402(config: RequestConfig): Promise<ProbeResult> {
-  const res = await fetch(config.url, buildInit(config));
+  const res = await proxyFetch(config.url, buildInit(config));
   const text = await res.text();
   const requirements = decodeRequirements(res.headers.get("payment-required"));
   return {
@@ -133,7 +175,7 @@ export async function payX402(
   );
 
   try {
-    const fetchWithPay = wrapFetchWithPayment(fetch, client);
+    const fetchWithPay = wrapFetchWithPayment(proxyFetch as typeof fetch, client);
     const res = await fetchWithPay(config.url, buildInit(config));
     const text = await res.text();
     let receipt: unknown = null;

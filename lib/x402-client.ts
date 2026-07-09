@@ -1,0 +1,167 @@
+import {
+  wrapFetchWithPayment,
+  x402Client,
+  decodePaymentResponseHeader,
+} from "@x402/fetch";
+import { ExactEvmScheme } from "@x402/evm/exact/client";
+import type { Network } from "@x402/core/types";
+import type { WalletClient } from "viem";
+import { NETWORK } from "./constants";
+
+export type RequestConfig = {
+  url: string;
+  method: string;
+  headers?: Record<string, string>;
+  body?: string;
+};
+
+export type ProbeResult = {
+  status: number;
+  ok: boolean;
+  /** Decoded `payment-required` header (the x402 accepts array), or null. */
+  requirements: unknown;
+  /** Whether the endpoint returned a well-formed 402 challenge. */
+  isX402: boolean;
+  headers: Record<string, string>;
+  body: unknown;
+};
+
+export type PayResult = {
+  status: number;
+  ok: boolean;
+  headers: Record<string, string>;
+  body: unknown;
+  /** Decoded `payment-response` header (the settlement receipt), or null. */
+  receipt: unknown;
+  payer: string;
+  error?: string;
+};
+
+type TypedDataMessage = {
+  domain: Record<string, unknown>;
+  types: Record<string, unknown>;
+  primaryType: string;
+  message: Record<string, unknown>;
+};
+
+/** Adapt a connected viem WalletClient into the x402 ClientEvmSigner shape. */
+function signerFromWallet(wallet: WalletClient) {
+  const address = wallet.account!.address;
+  const signTypedData = wallet.signTypedData as (
+    args: TypedDataMessage & { account: `0x${string}` },
+  ) => Promise<`0x${string}`>;
+  return {
+    address,
+    signTypedData: (msg: TypedDataMessage) =>
+      signTypedData({ account: address, ...msg }),
+  };
+}
+
+function buildInit(config: RequestConfig): RequestInit {
+  const init: RequestInit = { method: config.method, cache: "no-store" };
+  if (config.headers && Object.keys(config.headers).length) {
+    init.headers = config.headers;
+  }
+  const method = config.method.toUpperCase();
+  if (config.body && method !== "GET" && method !== "HEAD") {
+    init.body = config.body;
+  }
+  return init;
+}
+
+function headersToObject(h: Headers): Record<string, string> {
+  const out: Record<string, string> = {};
+  h.forEach((value, key) => {
+    out[key] = value;
+  });
+  return out;
+}
+
+function decodeRequirements(header: string | null): unknown {
+  if (!header) return null;
+  try {
+    return JSON.parse(atob(header));
+  } catch {
+    try {
+      return JSON.parse(header);
+    } catch {
+      return header;
+    }
+  }
+}
+
+function safeJson(text: string): unknown {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+/**
+ * Unpaid probe: send the request and read the 402 challenge. No wallet needed.
+ * This is the "inspect what the endpoint requires" step.
+ */
+export async function probeX402(config: RequestConfig): Promise<ProbeResult> {
+  const res = await fetch(config.url, buildInit(config));
+  const text = await res.text();
+  const requirements = decodeRequirements(res.headers.get("payment-required"));
+  return {
+    status: res.status,
+    ok: res.ok,
+    requirements,
+    isX402: res.status === 402 && requirements != null,
+    headers: headersToObject(res.headers),
+    body: safeJson(text),
+  };
+}
+
+/**
+ * Paid call: `wrapFetchWithPayment` runs the full 402 -> sign (EIP-3009) ->
+ * retry loop with the connected wallet. Returns the unlocked response + the
+ * settlement receipt.
+ */
+export async function payX402(
+  wallet: WalletClient,
+  config: RequestConfig,
+): Promise<PayResult> {
+  const signer = signerFromWallet(wallet);
+  const client = new x402Client().register(
+    NETWORK as Network,
+    new ExactEvmScheme(signer),
+  );
+
+  try {
+    const fetchWithPay = wrapFetchWithPayment(fetch, client);
+    const res = await fetchWithPay(config.url, buildInit(config));
+    const text = await res.text();
+    let receipt: unknown = null;
+    const header = res.headers.get("payment-response");
+    if (header) {
+      try {
+        receipt = decodePaymentResponseHeader(header);
+      } catch {
+        /* malformed receipt — leave null */
+      }
+    }
+    return {
+      status: res.status,
+      ok: res.ok,
+      headers: headersToObject(res.headers),
+      body: safeJson(text),
+      receipt,
+      payer: signer.address,
+    };
+  } catch (err) {
+    return {
+      status: 0,
+      ok: false,
+      headers: {},
+      body: null,
+      receipt: null,
+      payer: signer.address,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}

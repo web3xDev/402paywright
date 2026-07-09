@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* x402 Playground — dark, developer-tool aesthetic. */
+:root {
+  --background: #05060a;
+  --foreground: #e8ecf4;
+  --muted: #8b94a7;
+  --neon: #22d3ee; /* cyan */
+  --neon-2: #00ffa3; /* green */
+  --amber: #febc2e;
+  --red: #ff5f57;
+  --card: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-neon: var(--neon);
+  --color-neon-2: var(--neon-2);
+  --color-amber: var(--amber);
+  --color-red: var(--red);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tailwind v4 no longer sets cursor:pointer on buttons — restore it. */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+}
+
+.neon-border {
+  border: 1px solid var(--border);
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.04),
+    0 0 40px -12px rgba(34, 211, 238, 0.25);
+}
+
+.btn-neon {
+  background: linear-gradient(120deg, var(--neon), var(--neon-2));
+  color: #04121a;
+  box-shadow: 0 0 30px -6px rgba(0, 255, 163, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-neon:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 44px -4px rgba(0, 255, 163, 0.7);
+}
+.btn-neon:disabled {
+  box-shadow: none;
+  opacity: 0.4;
+}
+
+.btn-ghost {
+  border: 1px solid var(--border);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.btn-ghost:not(:disabled):hover {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.06);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 163, 0.6); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 255, 163, 0); }
+}
+.animate-pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin 0.8s linear infinite; }

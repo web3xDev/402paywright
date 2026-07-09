@@ -222,34 +222,42 @@ export default function Home() {
           >
             {showAdvanced ? "▾" : "▸"} Headers &amp; body
           </button>
-          {showAdvanced && (
-            <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs text-muted">
-                  Headers (one <span className="font-mono">Key: Value</span> per line)
-                </label>
-                <textarea
-                  value={headersText}
-                  onChange={(e) => setHeadersText(e.target.value)}
-                  rows={4}
-                  placeholder={"Authorization: Bearer …\nContent-Type: application/json"}
-                  className="field w-full p-2.5 font-mono text-xs placeholder:text-muted"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-muted">
-                  Body (for POST / PUT / PATCH)
-                </label>
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={4}
-                  placeholder={'{ "key": "value" }'}
-                  className="field w-full p-2.5 font-mono text-xs placeholder:text-muted"
-                />
+          <div
+            className={`grid transition-all duration-150 ease-out ${
+              showAdvanced
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs text-muted">
+                    Headers (one <span className="font-mono">Key: Value</span> per line)
+                  </label>
+                  <textarea
+                    value={headersText}
+                    onChange={(e) => setHeadersText(e.target.value)}
+                    rows={4}
+                    placeholder={"Authorization: Bearer …\nContent-Type: application/json"}
+                    className="field w-full p-2.5 font-mono text-xs placeholder:text-muted"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-muted">
+                    Body (for POST)
+                  </label>
+                  <textarea
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    rows={4}
+                    placeholder={'{ "key": "value" }'}
+                    className="field w-full p-2.5 font-mono text-xs placeholder:text-muted"
+                  />
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {error && (

@@ -484,7 +484,7 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="mt-2">
-                  <div key={respTab} className="animate-fade">
+                  <div key={respTab} className="tab-enter">
                     <Json
                       value={
                         respTab === "body"

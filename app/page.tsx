@@ -184,6 +184,17 @@ export default function Home() {
       if (balance < BigInt(s.amount)) {
         toast.error(
           `Insufficient USDC — you have ${formatUsdc(balance)} but this call costs ${s.usdc ?? s.amount}.`,
+          // Faucet only exists for Base Sepolia — don't offer it on mainnets
+          // or other testnets we may activate later.
+          ACTIVE_CHAIN.id === "base-sepolia"
+            ? {
+                action: {
+                  label: "Get testnet USDC",
+                  onClick: () =>
+                    window.open(FAUCET_URL, "_blank", "noopener,noreferrer"),
+                },
+              }
+            : undefined,
         );
         return;
       }

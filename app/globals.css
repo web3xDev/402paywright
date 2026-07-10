@@ -118,3 +118,11 @@ button:disabled {
   to { opacity: 1; transform: translateY(0); }
 }
 .tab-enter { animation: tab-enter 0.22s ease-out both; }
+
+/* Keep sonner toasts smoothly animated on enter/exit (also under
+   "reduce motion", where sonner would otherwise snap). */
+[data-sonner-toast] {
+  transition:
+    transform 0.4s cubic-bezier(0.21, 1.02, 0.73, 1),
+    opacity 0.4s ease !important;
+}

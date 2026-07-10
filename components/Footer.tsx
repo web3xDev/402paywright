@@ -16,7 +16,7 @@ export function Footer() {
             href="https://flash402.xyz"
             target="_blank"
             rel="noreferrer"
-            className="transition-colors hover:text-accent"
+            className="transition-colors duration-150 hover:text-accent"
           >
             Flash402 ↗
           </a>
@@ -24,7 +24,7 @@ export function Footer() {
             href="https://x402.org"
             target="_blank"
             rel="noreferrer"
-            className="transition-colors hover:text-foreground"
+            className="transition-colors duration-150 hover:text-foreground"
           >
             x402.org
           </a>
@@ -32,7 +32,7 @@ export function Footer() {
             href="https://github.com/web3xDev"
             target="_blank"
             rel="noreferrer"
-            className="transition-colors hover:text-foreground"
+            className="transition-colors duration-150 hover:text-foreground"
           >
             GitHub
           </a>
@@ -42,7 +42,7 @@ export function Footer() {
               href="https://github.com/web3xDev"
               target="_blank"
               rel="noreferrer"
-              className="text-foreground transition-colors hover:text-accent"
+              className="text-foreground transition-colors duration-150 hover:text-accent"
             >
               web3xDev
             </a>

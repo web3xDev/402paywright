@@ -89,7 +89,7 @@ button:disabled {
 .btn-ghost {
   border: 1px solid var(--border);
   border-radius: 8px;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 .btn-ghost:not(:disabled):hover {
   border-color: rgba(255, 108, 55, 0.5);

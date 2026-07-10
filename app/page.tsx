@@ -20,8 +20,19 @@ import {
   EXPLORER_ADDRESS,
 } from "@/lib/constants";
 import { readUsdcBalance, formatUsdc } from "@/lib/balance";
+import {
+  encodeRequestToParams,
+  decodeRequestFromParams,
+  toCurl,
+  toFetchSnippet,
+  loadHistory,
+  pushHistory,
+  clearHistory,
+  type HistoryItem,
+} from "@/lib/request-io";
 import { MethodSelect } from "@/components/MethodSelect";
 import { ChainDropdown } from "@/components/ChainDropdown";
+import { CopyButton } from "@/components/CopyButton";
 import { Footer } from "@/components/Footer";
 
 const METHODS = ["GET", "POST"];
@@ -63,9 +74,17 @@ function Json({ value }: { value: unknown }) {
   const text =
     typeof value === "string" ? value : JSON.stringify(value, null, 2);
   return (
-    <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap wrap-anywhere rounded-lg border border-[var(--border)] bg-black/30 p-3 font-mono text-xs leading-relaxed text-muted">
-      {text || "(empty)"}
-    </pre>
+    <div className="relative">
+      <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap wrap-anywhere rounded-lg border border-[var(--border)] bg-black/30 p-3 pr-10 font-mono text-xs leading-relaxed text-muted">
+        {text || "(empty)"}
+      </pre>
+      {text && (
+        <CopyButton
+          text={text}
+          className="absolute right-2 top-2 rounded-md border border-[var(--border)] bg-panel/80 p-1.5 backdrop-blur"
+        />
+      )}
+    </div>
   );
 }
 
@@ -113,8 +132,29 @@ export default function Home() {
   const [payMs, setPayMs] = useState<number | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [respTab, setRespTab] = useState<"body" | "headers" | "receipt">("body");
+  const [showCode, setShowCode] = useState(false);
+  const [codeTab, setCodeTab] = useState<"curl" | "js">("curl");
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const probeSecRef = useRef<HTMLElement>(null);
   const paySecRef = useRef<HTMLElement>(null);
+
+  // On mount: hydrate the form from a shared link (?url=…) and load history.
+  useEffect(() => {
+    const shared = decodeRequestFromParams(window.location.search);
+    if (shared) {
+      if (shared.method) setMethod(shared.method);
+      if (shared.url) setUrl(shared.url);
+      if (shared.headersText) {
+        setHeadersText(shared.headersText);
+        setShowAdvanced(true);
+      }
+      if (shared.body) {
+        setBody(shared.body);
+        setShowAdvanced(true);
+      }
+    }
+    setHistory(loadHistory());
+  }, []);
 
   // Scroll newly-revealed results into view so you don't have to hunt for them.
   useEffect(() => {
@@ -143,6 +183,7 @@ export default function Home() {
   }, [url, method, headersText, body]);
 
   const urlValid = /^https?:\/\/.+/.test(config.url);
+  const codeText = codeTab === "curl" ? toCurl(config) : toFetchSnippet(config);
 
   // Read the connected wallet's USDC balance (for display + pre-flight check).
   // A request token guards against out-of-order responses when the address
@@ -195,8 +236,34 @@ export default function Home() {
     return () => window.removeEventListener("focus", refreshBalance);
   }, [refreshBalance]);
 
+  async function onShare() {
+    const qs = encodeRequestToParams({ url, method, headersText, body });
+    const link = `${window.location.origin}${window.location.pathname}?${qs}`;
+    window.history.replaceState(null, "", `?${qs}`); // reflect it in the address bar
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Shareable link copied");
+    } catch {
+      toast.error("Couldn't copy — grab it from the address bar");
+    }
+  }
+
+  function applyDraft(d: {
+    url: string;
+    method: string;
+    headersText?: string;
+    body?: string;
+  }) {
+    setMethod(d.method);
+    setUrl(d.url);
+    setHeadersText(d.headersText ?? "");
+    setBody(d.body ?? "");
+    if (d.headersText?.trim() || d.body?.trim()) setShowAdvanced(true);
+  }
+
   async function onSend() {
     if (!urlValid) return;
+    setHistory(pushHistory({ url, method, headersText, body }));
     setProbe(null);
     setPay(null);
     setPayMs(null);
@@ -369,22 +436,107 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Actions: share the request as a link, export it as code */}
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onShare}
+            disabled={!urlValid}
+            className="btn-ghost inline-flex h-8 items-center gap-1.5 px-3 text-xs text-muted hover:text-foreground disabled:opacity-40 disabled:hover:text-muted"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+            </svg>
+            Share
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCode((s) => !s)}
+            disabled={!urlValid}
+            className={`btn-ghost inline-flex h-8 items-center gap-1.5 px-3 text-xs disabled:opacity-40 ${
+              showCode ? "border-accent/50 text-foreground" : "text-muted hover:text-foreground"
+            }`}
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+            </svg>
+            Code
+          </button>
+        </div>
+
+        {/* Code export panel */}
+        <div
+          className={`grid transition-all duration-150 ease-out ${
+            showCode && urlValid
+              ? "mt-2 grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="panel p-3">
+              <div className="mb-2 flex items-center gap-1">
+                {(["curl", "js"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setCodeTab(t)}
+                    className={`rounded-md px-2.5 py-1 text-xs transition-colors duration-150 ${
+                      codeTab === t
+                        ? "bg-white/5 text-foreground"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {t === "curl" ? "cURL" : "JavaScript"}
+                  </button>
+                ))}
+                <CopyButton text={codeText} label="Copy" className="ml-auto text-xs" />
+              </div>
+              <pre className="max-h-72 overflow-auto rounded-lg border border-[var(--border)] bg-black/30 p-3 font-mono text-xs leading-relaxed text-muted">
+                {codeText}
+              </pre>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs text-muted">
           <span>Try:</span>
           {SAMPLE_ENDPOINTS.map((s) => (
             <button
               key={s.url}
               type="button"
-              onClick={() => {
-                setMethod(s.method);
-                setUrl(s.url);
-              }}
+              onClick={() => applyDraft({ url: s.url, method: s.method })}
               className="rounded-full border border-[var(--border)] px-2.5 py-1 transition-colors duration-150 hover:border-accent/50 hover:text-foreground"
             >
               {s.label}
             </button>
           ))}
         </div>
+
+        {/* Recent requests (localStorage) */}
+        {history.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span>Recent:</span>
+            {history.map((h) => (
+              <button
+                key={h.at}
+                type="button"
+                onClick={() => applyDraft(h)}
+                title={`${h.method} ${h.url}`}
+                className="inline-flex max-w-[240px] items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 transition-colors duration-150 hover:border-accent/50 hover:text-foreground"
+              >
+                <span className="font-mono text-[10px] text-accent-2">{h.method}</span>
+                <span className="truncate">{h.url.replace(/^https?:\/\//, "")}</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setHistory(clearHistory())}
+              className="underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline"
+            >
+              clear
+            </button>
+          </div>
+        )}
 
         {/* Probe result — the 402 challenge */}
         {probe && (
@@ -423,6 +575,7 @@ export default function Home() {
                   value={req.payTo && short(req.payTo)}
                   full={req.payTo ?? undefined}
                   href={req.payTo ? `${EXPLORER_ADDRESS}${req.payTo}` : undefined}
+                  copy={req.payTo ?? undefined}
                   mono
                 />
                 <Field
@@ -430,6 +583,7 @@ export default function Home() {
                   value={req.asset && short(req.asset)}
                   full={req.asset ?? undefined}
                   href={req.asset ? `${EXPLORER_ADDRESS}${req.asset}` : undefined}
+                  copy={req.asset ?? undefined}
                   mono
                 />
                 {req.description && <Field label="note" value={req.description} />}
@@ -537,14 +691,20 @@ export default function Home() {
             ) : (
               <div>
                 {txHash && (
-                  <a
-                    href={`${EXPLORER_TX}${txHash}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent transition-colors duration-150 hover:border-accent/50"
-                  >
-                    {short(txHash)} · view settlement ↗
-                  </a>
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <a
+                      href={`${EXPLORER_TX}${txHash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent transition-colors duration-150 hover:border-accent/50"
+                    >
+                      {short(txHash)} · view settlement ↗
+                    </a>
+                    <CopyButton
+                      text={txHash}
+                      className="rounded-md border border-[var(--border)] p-1.5"
+                    />
+                  </div>
                 )}
                 <div className="flex gap-1 border-b border-[var(--border)]">
                   {(["body", "headers", "receipt"] as const).map((t) => (
@@ -597,6 +757,7 @@ function Field({
   mono,
   full,
   href,
+  copy,
 }: {
   label: string;
   value?: string | null;
@@ -605,6 +766,8 @@ function Field({
   full?: string;
   /** When set, the value becomes a link (opens in a new tab). */
   href?: string;
+  /** When set, a copy button after the value copies this string. */
+  copy?: string;
 }) {
   if (!value) return null;
   const valueClass = `break-all text-foreground ${mono ? "font-mono" : ""}`;
@@ -645,6 +808,7 @@ function Field({
       ) : (
         trigger
       )}
+      {copy && <CopyButton text={copy} className="shrink-0" />}
     </div>
   );
 }

@@ -158,3 +158,15 @@ button:disabled {
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 [data-sonner-toast] [data-close-button]:hover { color: var(--foreground); }
+
+/* On mobile, center the toaster (sonner's position prop isn't responsive) and
+ * cap its width so it never overflows a narrow screen. !important beats
+ * sonner's inline --width and its [data-x-position=right] rule. */
+@media (max-width: 640px) {
+  [data-sonner-toaster][data-x-position="right"] {
+    --width: min(356px, calc(100vw - 2rem)) !important;
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}

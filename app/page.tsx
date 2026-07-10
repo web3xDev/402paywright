@@ -453,7 +453,7 @@ export default function Home() {
             type="button"
             onClick={() => setShowCode((s) => !s)}
             disabled={!urlValid}
-            className={`btn-ghost inline-flex h-8 items-center gap-1.5 px-3 text-xs disabled:opacity-40 ${
+            className={`btn-ghost inline-flex h-8 items-center gap-1.5 px-3 text-xs disabled:opacity-40 disabled:hover:text-muted ${
               showCode ? "border-accent/50 text-foreground" : "text-muted hover:text-foreground"
             }`}
           >

@@ -119,10 +119,20 @@ button:disabled {
 }
 .tab-enter { animation: tab-enter 0.22s ease-out both; }
 
-/* Keep sonner toasts smoothly animated on enter/exit (also under
-   "reduce motion", where sonner would otherwise snap). */
+/* Force a smooth fade on sonner toasts even under OS "reduce motion"
+   (where sonner disables its own animation and would snap in/out).
+   Opacity-only so it never fights sonner's positioning transforms. */
+@keyframes toast-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes toast-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 [data-sonner-toast] {
-  transition:
-    transform 0.4s cubic-bezier(0.21, 1.02, 0.73, 1),
-    opacity 0.4s ease !important;
+  animation: toast-fade-in 0.28s ease both;
+}
+[data-sonner-toast][data-removed="true"] {
+  animation: toast-fade-out 0.28s ease both !important;
 }

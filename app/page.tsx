@@ -62,7 +62,7 @@ function Json({ value }: { value: unknown }) {
   const text =
     typeof value === "string" ? value : JSON.stringify(value, null, 2);
   return (
-    <pre className="max-h-72 overflow-auto rounded-lg border border-[var(--border)] bg-black/30 p-3 font-mono text-xs leading-relaxed text-muted">
+    <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap wrap-anywhere rounded-lg border border-[var(--border)] bg-black/30 p-3 font-mono text-xs leading-relaxed text-muted">
       {text || "(empty)"}
     </pre>
   );

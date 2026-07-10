@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useConnection, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import { ConnectButton } from "@/components/ConnectButton";
@@ -144,19 +144,27 @@ export default function Home() {
   const urlValid = /^https?:\/\/.+/.test(config.url);
 
   // Read the connected wallet's USDC balance (for display + pre-flight check).
-  useEffect(() => {
+  // A request token guards against out-of-order responses when the address
+  // changes mid-flight.
+  const balReqRef = useRef(0);
+  const refreshBalance = useCallback(() => {
     if (!address || chainId !== CHAIN_ID) {
       setBalance(null);
       return;
     }
-    let cancelled = false;
+    const token = ++balReqRef.current;
     readUsdcBalance(address)
-      .then((b) => !cancelled && setBalance(b))
-      .catch(() => !cancelled && setBalance(null));
-    return () => {
-      cancelled = true;
-    };
+      .then((b) => token === balReqRef.current && setBalance(b))
+      .catch(() => token === balReqRef.current && setBalance(null));
   }, [address, chainId]);
+
+  // Re-read on connect / chain switch, and whenever the tab regains focus
+  // (e.g. after topping up at the faucet in another tab).
+  useEffect(() => {
+    refreshBalance();
+    window.addEventListener("focus", refreshBalance);
+    return () => window.removeEventListener("focus", refreshBalance);
+  }, [refreshBalance]);
 
   async function onSend() {
     if (!urlValid) return;
@@ -214,8 +222,10 @@ export default function Home() {
       const r = await payX402(walletClient, config);
       setPayMs(Date.now() - t0);
       setPay(r);
-      if (r.ok) toast.success("Payment settled onchain");
-      else if (r.error) toast.error(r.error);
+      if (r.ok) {
+        toast.success("Payment settled onchain");
+        refreshBalance(); // reflect the debited USDC without a manual reload
+      } else if (r.error) toast.error(r.error);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
     } finally {

@@ -159,14 +159,20 @@ button:disabled {
 }
 [data-sonner-toast] [data-close-button]:hover { color: var(--foreground); }
 
-/* On mobile, center the toaster (sonner's position prop isn't responsive) and
- * cap its width so it never overflows a narrow screen. !important beats
- * sonner's inline --width and its [data-x-position=right] rule. */
+/* On mobile, center the toaster (sonner's position prop isn't responsive).
+ * Sonner's own <=600px rules set width:100% + a transform; overriding with
+ * symmetric left/right (no transform) gives a guaranteed-centered, full-width
+ * toast with equal margins. Higher specificity + !important beats sonner. */
 @media (max-width: 640px) {
   [data-sonner-toaster][data-x-position="right"] {
-    --width: min(356px, calc(100vw - 2rem)) !important;
-    right: auto !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+    transform: none !important;
+  }
+  [data-sonner-toaster][data-x-position="right"] [data-sonner-toast] {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
   }
 }

@@ -755,18 +755,18 @@ export default function Home() {
             ) : (
               <div>
                 {txHash && (
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <div className="mb-3 flex items-center gap-2">
                     <a
                       href={`${EXPLORER_TX}${txHash}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent transition-colors duration-150 hover:border-accent/50"
+                      className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent transition-colors duration-150 hover:border-accent/50"
                     >
-                      {short(txHash)} · view settlement ↗
+                      <span className="truncate">{short(txHash)} · view settlement ↗</span>
                     </a>
                     <CopyButton
                       text={txHash}
-                      className="rounded-md border border-[var(--border)] p-1.5"
+                      className="shrink-0 rounded-md border border-[var(--border)] p-1.5"
                     />
                   </div>
                 )}

@@ -601,22 +601,24 @@ export default function Home() {
         {/* Probe result — the 402 challenge */}
         {probe && !probing && (
           <section ref={probeSecRef} className="mt-6 animate-in">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-sm font-semibold">1 · Payment challenge</span>
-              <StatusBar status={probe.status} ok={probe.ok} ms={probeMs} />
-              {probe.isX402 ? (
-                <span className="rounded bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-accent/30">
-                  valid x402
-                </span>
-              ) : probe.status === 402 ? (
-                <span className="rounded bg-accent-2/10 px-2 py-0.5 text-xs text-accent-2 ring-1 ring-accent-2/30">
-                  402 but no requirements header
-                </span>
-              ) : (
-                <span className="rounded bg-white/5 px-2 py-0.5 text-xs text-muted ring-1 ring-[var(--border)]">
-                  not an x402 challenge
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBar status={probe.status} ok={probe.ok} ms={probeMs} />
+                {probe.isX402 ? (
+                  <span className="rounded bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent ring-1 ring-accent/30">
+                    valid x402
+                  </span>
+                ) : probe.status === 402 ? (
+                  <span className="rounded bg-accent-2/10 px-2 py-0.5 text-xs text-accent-2 ring-1 ring-accent-2/30">
+                    402 but no requirements header
+                  </span>
+                ) : (
+                  <span className="rounded bg-white/5 px-2 py-0.5 text-xs text-muted ring-1 ring-[var(--border)]">
+                    not an x402 challenge
+                  </span>
+                )}
+              </div>
             </div>
 
             {req && (
@@ -734,14 +736,16 @@ export default function Home() {
         {/* Pay result — the unlocked response */}
         {pay && (
           <section ref={paySecRef} className="mt-6 animate-in">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-sm font-semibold">2 · Settled response</span>
-              <StatusBar status={pay.status} ok={pay.ok} ms={payMs} />
-              {pay.receipt != null && (
-                <span className="rounded bg-ok/10 px-2 py-0.5 text-xs font-medium text-ok ring-1 ring-ok/30">
-                  settled onchain
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBar status={pay.status} ok={pay.ok} ms={payMs} />
+                {pay.receipt != null && (
+                  <span className="rounded bg-ok/10 px-2 py-0.5 text-xs font-medium text-ok ring-1 ring-ok/30">
+                    settled onchain
+                  </span>
+                )}
+              </div>
             </div>
 
             {pay.error ? (

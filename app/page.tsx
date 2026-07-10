@@ -158,6 +158,28 @@ export default function Home() {
       .catch(() => token === balReqRef.current && setBalance(null));
   }, [address, chainId]);
 
+  // After a settled payment the public RPC can lag a beat before it reflects
+  // the debit, so poll until the balance actually changes (or we give up).
+  const pollBalanceAfterPay = useCallback(
+    async (before: bigint | null) => {
+      if (!address || chainId !== CHAIN_ID) return;
+      const token = ++balReqRef.current;
+      for (let i = 0; i < 6; i++) {
+        await new Promise((res) => setTimeout(res, i === 0 ? 800 : 1500));
+        if (token !== balReqRef.current) return; // superseded (e.g. account switch)
+        try {
+          const b = await readUsdcBalance(address);
+          if (token !== balReqRef.current) return;
+          setBalance(b);
+          if (before == null || b !== before) return; // debit is now visible
+        } catch {
+          /* transient RPC error — keep trying */
+        }
+      }
+    },
+    [address, chainId],
+  );
+
   // On account switch, drop the previous account's balance immediately so we
   // never flash a stale number while the new account's balance loads.
   useEffect(() => {
@@ -230,7 +252,8 @@ export default function Home() {
       setPay(r);
       if (r.ok) {
         toast.success("Payment settled onchain");
-        refreshBalance(); // reflect the debited USDC without a manual reload
+        // Poll (not a single read) so RPC lag doesn't leave a stale balance.
+        pollBalanceAfterPay(balance);
       } else if (r.error) toast.error(r.error);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));

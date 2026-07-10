@@ -26,7 +26,7 @@ export function ChainDropdown() {
             : "border-[var(--border)] hover:border-accent/50 hover:bg-accent/[0.06]"
         }`}
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-ok" />
+        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ok" />
         <span className="hidden sm:inline">{ACTIVE_CHAIN.label}</span>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
@@ -66,7 +66,7 @@ export function ChainDropdown() {
           >
             <span className="flex items-center gap-2">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${c.active ? "bg-ok" : "bg-muted"}`}
+                className={`h-1.5 w-1.5 rounded-full ${c.active ? "bg-ok animate-pulse-dot" : "bg-muted"}`}
               />
               {c.label}
             </span>

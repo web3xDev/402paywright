@@ -32,6 +32,7 @@ import {
 } from "@/lib/request-io";
 import { MethodSelect } from "@/components/MethodSelect";
 import { ChainDropdown } from "@/components/ChainDropdown";
+import { SampleDropdown } from "@/components/SampleDropdown";
 import { CopyButton } from "@/components/CopyButton";
 import { Footer } from "@/components/Footer";
 
@@ -393,19 +394,26 @@ export default function Home() {
 
         {/* Request builder */}
         <div className="panel p-3">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <MethodSelect value={method} onChange={setMethod} methods={METHODS} />
+          {/* On mobile the URL takes its own full-width row (order-1) and the
+              method/send/reset controls wrap onto the next; one row on sm+. */}
+          <div className="flex flex-wrap items-center gap-2">
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSend()}
               placeholder="https://api.example.com/paid-endpoint"
-              className="field h-9 min-w-0 flex-1 px-3 font-mono text-sm placeholder:text-muted"
+              className="field order-1 h-9 w-full min-w-0 flex-1 px-3 font-mono text-sm placeholder:text-muted sm:order-2 sm:w-auto"
+            />
+            <MethodSelect
+              value={method}
+              onChange={setMethod}
+              methods={METHODS}
+              className="order-2 sm:order-1"
             />
             <button
               onClick={onSend}
               disabled={!urlValid || probing}
-              className="btn-primary inline-flex h-9 items-center justify-center px-6 text-sm"
+              className="btn-primary order-3 inline-flex h-9 flex-1 items-center justify-center px-6 text-sm sm:flex-none"
             >
               {probing ? "Sending…" : "Send"}
             </button>
@@ -415,7 +423,7 @@ export default function Home() {
               disabled={!dirty}
               aria-label="Reset request and results"
               title="Reset"
-              className="btn-ghost inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted hover:text-foreground disabled:opacity-40 disabled:hover:text-muted"
+              className="btn-ghost order-4 inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted hover:text-foreground disabled:opacity-40 disabled:hover:text-muted"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polyline points="1 4 1 10 7 10" />
@@ -530,7 +538,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs text-muted">
+        {/* Samples: chips on sm+, a dropdown on mobile where they'd overflow. */}
+        <div className="mt-2.5 hidden flex-wrap items-center gap-2 text-xs text-muted sm:flex">
           <span>Try:</span>
           {SAMPLE_ENDPOINTS.map((s) => (
             <button
@@ -542,6 +551,12 @@ export default function Home() {
               {s.label}
             </button>
           ))}
+        </div>
+        <div className="mt-2.5 sm:hidden">
+          <SampleDropdown
+            samples={SAMPLE_ENDPOINTS}
+            onSelect={(s) => applyDraft({ url: s.url, method: s.method })}
+          />
         </div>
 
         {/* Recent requests (localStorage) */}

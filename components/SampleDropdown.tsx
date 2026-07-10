@@ -2,21 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export const METHOD_COLOR: Record<string, string> = {
-  GET: "text-ok",
-  POST: "text-accent-2",
-};
+type Sample = { label: string; url: string; method: string };
 
-export function MethodSelect({
-  value,
-  onChange,
-  methods,
-  className,
+/** Compact picker for the sample endpoints — used on mobile where the chip
+ *  row would overflow. Styled to match ChainDropdown. */
+export function SampleDropdown({
+  samples,
+  onSelect,
 }: {
-  value: string;
-  onChange: (m: string) => void;
-  methods: string[];
-  className?: string;
+  samples: Sample[];
+  onSelect: (s: Sample) => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -30,18 +25,20 @@ export function MethodSelect({
   }, []);
 
   return (
-    <div className={`relative sm:w-28 ${className ?? ""}`} ref={ref}>
+    <div className="relative w-full" ref={ref}>
       <button
         type="button"
         onClick={(e) => {
-          // Closing via the trigger keeps :focus, so the field's focus border
-          // would linger until you click elsewhere — blur it on close.
           if (open) e.currentTarget.blur();
           setOpen((o) => !o);
         }}
-        className={`field flex h-9 w-full items-center justify-between px-3 font-mono text-sm font-semibold ${METHOD_COLOR[value] ?? ""}`}
+        className={`inline-flex h-8 w-full items-center justify-between gap-2 rounded-lg border px-3 text-xs font-medium transition-colors duration-150 ${
+          open
+            ? "border-accent text-foreground"
+            : "border-[var(--border)] text-muted hover:border-accent/50 hover:text-foreground"
+        }`}
       >
-        {value}
+        Try a sample endpoint
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 24 24"
@@ -59,25 +56,25 @@ export function MethodSelect({
       {/* Kept mounted so the open/close transition runs both ways. */}
       <div
         aria-hidden={!open}
-        className={`absolute left-0 z-30 mt-1.5 w-full min-w-28 origin-top overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
+        className={`absolute left-0 z-30 mt-1.5 w-full origin-top overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
         }`}
       >
-        {methods.map((m) => (
+        {samples.map((s) => (
           <button
-            key={m}
+            key={s.url}
             type="button"
             tabIndex={open ? 0 : -1}
             onClick={() => {
-              onChange(m);
+              onSelect(s);
               setOpen(false);
             }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 font-mono text-sm font-semibold transition-colors hover:bg-white/5 ${METHOD_COLOR[m] ?? ""}`}
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-foreground transition-colors duration-150 hover:bg-white/5"
           >
-            {m}
-            {m === value && <span className="text-muted">✓</span>}
+            <span className="font-mono text-[10px] text-accent-2">{s.method}</span>
+            <span className="truncate">{s.label}</span>
           </button>
         ))}
       </div>

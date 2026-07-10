@@ -145,3 +145,16 @@ button:disabled {
     transition: transform 0.4s, opacity 0.4s, height 0.4s, box-shadow 0.2s !important;
   }
 }
+
+/* Toast status color belongs on the leading icon (next to the text), not the
+ * close button. We drop sonner's richColors and paint the icon per type here;
+ * the close button stays a neutral muted control. */
+[data-sonner-toast][data-type="success"] [data-icon] { color: var(--ok); }
+[data-sonner-toast][data-type="error"] [data-icon] { color: var(--red); }
+[data-sonner-toast][data-type="warning"] [data-icon] { color: var(--accent-2); }
+[data-sonner-toast][data-type="info"] [data-icon] { color: var(--blue); }
+[data-sonner-toast] [data-close-button] {
+  color: var(--muted);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+[data-sonner-toast] [data-close-button]:hover { color: var(--foreground); }

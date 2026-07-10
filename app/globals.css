@@ -119,6 +119,15 @@ button:disabled {
 }
 .tab-enter { animation: tab-enter 0.22s ease-out both; }
 
+/* Faucet nudge: when the wallet has 0 USDC, pulse the "Need testnet USDC?"
+ * link between its resting (muted) and hover (foreground) colors to draw
+ * the eye. Same lit color as the link's :hover state. */
+@keyframes faucet-pulse {
+  0%, 100% { color: var(--muted); }
+  50% { color: var(--foreground); }
+}
+.animate-faucet-pulse { animation: faucet-pulse 1.8s ease-in-out infinite; }
+
 /*
  * Sonner disables its own enter/exit transitions under prefers-reduced-motion
  * (its injected rule: @media (prefers-reduced-motion){[data-sonner-toast]{transition:none!important}}).

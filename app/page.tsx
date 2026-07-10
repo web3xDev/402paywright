@@ -446,7 +446,9 @@ export default function Home() {
                   href={FAUCET_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs text-muted underline underline-offset-2 transition-colors duration-150 hover:text-foreground"
+                  className={`text-xs text-muted underline underline-offset-2 transition-colors duration-150 hover:text-foreground ${
+                    balance === 0n ? "animate-faucet-pulse" : ""
+                  }`}
                 >
                   Need testnet USDC?
                 </a>

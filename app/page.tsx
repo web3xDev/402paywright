@@ -447,7 +447,7 @@ export default function Home() {
                   target="_blank"
                   rel="noreferrer"
                   className={`text-xs text-muted underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline ${
-                    balance === 0n ? "animate-faucet-pulse hover:animate-none" : ""
+                    balance === 0n ? "animate-faucet-pulse" : ""
                   }`}
                 >
                   Need testnet USDC?

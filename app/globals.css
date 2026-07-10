@@ -127,6 +127,11 @@ button:disabled {
   50% { color: var(--foreground); }
 }
 .animate-faucet-pulse { animation: faucet-pulse 1.8s ease-in-out infinite; }
+/* Stop the pulse on hover so the link settles on its lit (foreground) color.
+ * Defined here (unlayered) alongside the animation so it wins over it —
+ * Tailwind's hover:animate-none sits in the utilities layer and would lose
+ * to this unlayered rule regardless of specificity. */
+.animate-faucet-pulse:hover { animation: none; }
 
 /*
  * Sonner disables its own enter/exit transitions under prefers-reduced-motion

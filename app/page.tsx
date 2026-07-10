@@ -261,6 +261,25 @@ export default function Home() {
     if (d.headersText?.trim() || d.body?.trim()) setShowAdvanced(true);
   }
 
+  // Wipe the form and results back to a clean slate (history is kept).
+  function onReset() {
+    setMethod("GET");
+    setUrl("");
+    setHeadersText("");
+    setBody("");
+    setShowAdvanced(false);
+    setShowRaw(false);
+    setShowCode(false);
+    setProbe(null);
+    setPay(null);
+    setProbeMs(null);
+    setPayMs(null);
+    setRespTab("body");
+    window.history.replaceState(null, "", window.location.pathname); // drop ?url=… params
+  }
+
+  const dirty = !!(url || headersText || body || probe || pay);
+
   async function onSend() {
     if (!urlValid) return;
     setHistory(pushHistory({ url, method, headersText, body }));
@@ -389,6 +408,19 @@ export default function Home() {
               className="btn-primary inline-flex h-9 items-center justify-center px-6 text-sm"
             >
               {probing ? "Sending…" : "Send"}
+            </button>
+            <button
+              type="button"
+              onClick={onReset}
+              disabled={!dirty}
+              aria-label="Reset request and results"
+              title="Reset"
+              className="btn-ghost inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted hover:text-foreground disabled:opacity-40 disabled:hover:text-muted"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+              </svg>
             </button>
           </div>
 

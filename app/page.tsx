@@ -359,12 +359,17 @@ export default function Home() {
     <div className="flex min-h-screen flex-col overflow-x-clip">
       {/* Header */}
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-2 text-lg font-bold tracking-tight">
+        <button
+          type="button"
+          onClick={onReset}
+          aria-label="Paywright — reset"
+          className="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity duration-150 hover:opacity-80"
+        >
           <span className="grid h-6 w-9 place-items-center rounded bg-accent font-mono text-xs font-bold text-[#1a0e08]">
             402
           </span>
           Paywright
-        </div>
+        </button>
         <div className="flex items-center gap-2">
           <ChainDropdown />
           <ConnectButton />

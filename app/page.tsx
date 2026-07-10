@@ -351,6 +351,9 @@ export default function Home() {
   }
 
   const req = summarize(probe?.requirements);
+  // Contextual (non-spammy) cross-promo: only nudge Flash402 when the endpoint
+  // being tested is itself a Flash402 gateway.
+  const isFlash402Gateway = /(?:^|\/\/|\.)flash402\.xyz\b/i.test(config.url);
   const receipt = (pay?.receipt ?? null) as Record<string, unknown> | null;
   const txHash =
     typeof receipt?.transaction === "string" ? receipt.transaction : null;
@@ -655,6 +658,22 @@ export default function Home() {
                 />
                 {req.description && <Field label="note" value={req.description} />}
               </div>
+            )}
+
+            {probe.isX402 && isFlash402Gateway && (
+              <a
+                href="https://flash402.xyz"
+                target="_blank"
+                rel="noreferrer"
+                className="mb-3 flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/[0.06] px-3 py-2 text-xs text-muted transition-colors duration-150 hover:border-accent/50 hover:text-foreground"
+              >
+                <span className="text-sm leading-none">⚡</span>
+                <span>
+                  This paywall runs on{" "}
+                  <span className="font-medium text-accent">Flash402</span> — spin up
+                  your own x402 gateway, no code →
+                </span>
+              </a>
             )}
 
             <div>

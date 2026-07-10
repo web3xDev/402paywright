@@ -13,6 +13,14 @@ export function Footer() {
         </span>
         <div className="flex items-center gap-5">
           <a
+            href="https://flash402.xyz"
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors hover:text-accent"
+          >
+            Flash402 ↗
+          </a>
+          <a
             href="https://x402.org"
             target="_blank"
             rel="noreferrer"

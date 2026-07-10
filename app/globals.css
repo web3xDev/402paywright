@@ -118,3 +118,16 @@ button:disabled {
   to { opacity: 1; transform: translateY(0); }
 }
 .tab-enter { animation: tab-enter 0.22s ease-out both; }
+
+/*
+ * Sonner disables its own enter/exit transitions under prefers-reduced-motion
+ * (its injected rule: @media (prefers-reduced-motion){[data-sonner-toast]{transition:none!important}}).
+ * Product decision: our toasts should always animate. Restore sonner's default
+ * toast transition with a higher-specificity selector ([data-sonner-toaster] [data-sonner-toast],
+ * 0,2,0) so it wins over sonner's (0,1,0) rule regardless of stylesheet order.
+ */
+@media (prefers-reduced-motion) {
+  [data-sonner-toaster] [data-sonner-toast] {
+    transition: transform 0.4s, opacity 0.4s, height 0.4s, box-shadow 0.2s !important;
+  }
+}

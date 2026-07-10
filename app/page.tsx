@@ -394,42 +394,41 @@ export default function Home() {
 
         {/* Request builder */}
         <div className="panel p-3">
-          {/* On mobile the URL takes its own full-width row (order-1) and the
-              method/send/reset controls wrap onto the next; one row on sm+. */}
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && onSend()}
-              placeholder="https://api.example.com/paid-endpoint"
-              className="field order-1 h-9 w-full min-w-0 flex-1 px-3 font-mono text-sm placeholder:text-muted sm:order-2 sm:w-auto"
-            />
-            <MethodSelect
-              value={method}
-              onChange={setMethod}
-              methods={METHODS}
-              className="order-2 sm:order-1"
-            />
-            <button
-              onClick={onSend}
-              disabled={!urlValid || probing}
-              className="btn-primary order-3 inline-flex h-9 flex-1 items-center justify-center px-6 text-sm sm:flex-none"
-            >
-              {probing ? "Sending…" : "Send"}
-            </button>
-            <button
-              type="button"
-              onClick={onReset}
-              disabled={!dirty}
-              aria-label="Reset request and results"
-              title="Reset"
-              className="btn-ghost order-4 inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted hover:text-foreground disabled:opacity-40 disabled:hover:text-muted"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polyline points="1 4 1 10 7 10" />
-                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-              </svg>
-            </button>
+          {/* Mobile: row 1 = method + URL (URL fills), row 2 = send + reset.
+              sm+: everything collapses onto a single row. */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex gap-2 sm:flex-1">
+              <MethodSelect value={method} onChange={setMethod} methods={METHODS} />
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onSend()}
+                placeholder="https://api.example.com/paid-endpoint"
+                className="field h-9 min-w-0 flex-1 px-3 font-mono text-sm placeholder:text-muted"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={onSend}
+                disabled={!urlValid || probing}
+                className="btn-primary inline-flex h-9 flex-1 items-center justify-center px-6 text-sm sm:flex-none"
+              >
+                {probing ? "Sending…" : "Send"}
+              </button>
+              <button
+                type="button"
+                onClick={onReset}
+                disabled={!dirty}
+                aria-label="Reset request and results"
+                title="Reset"
+                className="btn-ghost inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted hover:text-foreground disabled:opacity-40 disabled:hover:text-muted"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10" />
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <button

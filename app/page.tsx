@@ -601,7 +601,7 @@ export default function Home() {
         {/* Probe result — the 402 challenge */}
         {probe && !probing && (
           <section ref={probeSecRef} className="mt-6 animate-in">
-            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="mb-2 flex flex-col gap-2 min-[425px]:flex-row min-[425px]:flex-wrap min-[425px]:items-center">
               <span className="text-sm font-semibold">1 · Payment challenge</span>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBar status={probe.status} ok={probe.ok} ms={probeMs} />
@@ -736,7 +736,7 @@ export default function Home() {
         {/* Pay result — the unlocked response */}
         {pay && (
           <section ref={paySecRef} className="mt-6 animate-in">
-            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="mb-2 flex flex-col gap-2 min-[425px]:flex-row min-[425px]:flex-wrap min-[425px]:items-center">
               <span className="text-sm font-semibold">2 · Settled response</span>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBar status={pay.status} ok={pay.ok} ms={payMs} />

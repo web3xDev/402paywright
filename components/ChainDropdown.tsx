@@ -58,7 +58,7 @@ export function ChainDropdown() {
             disabled={!c.active}
             tabIndex={open ? 0 : -1}
             onClick={() => c.active && setOpen(false)}
-            className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm ${
+            className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm transition-colors duration-150 ${
               c.active
                 ? "text-foreground enabled:hover:bg-white/5"
                 : "cursor-not-allowed opacity-40"

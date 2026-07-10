@@ -182,19 +182,26 @@ export default function Home() {
     const s = summarize(probe?.requirements);
     if (balance != null && s?.amount && /^\d+$/.test(s.amount)) {
       if (balance < BigInt(s.amount)) {
+        const msg = `Insufficient USDC — you have ${formatUsdc(balance)} but this call costs ${s.usdc ?? s.amount}.`;
+        // Faucet only exists for Base Sepolia — don't offer it on mainnets
+        // or other testnets we may activate later. Stack the link under the
+        // message (JSX content) rather than the side-by-side action button.
         toast.error(
-          `Insufficient USDC — you have ${formatUsdc(balance)} but this call costs ${s.usdc ?? s.amount}.`,
-          // Faucet only exists for Base Sepolia — don't offer it on mainnets
-          // or other testnets we may activate later.
-          ACTIVE_CHAIN.id === "base-sepolia"
-            ? {
-                action: {
-                  label: "Get testnet USDC",
-                  onClick: () =>
-                    window.open(FAUCET_URL, "_blank", "noopener,noreferrer"),
-                },
-              }
-            : undefined,
+          ACTIVE_CHAIN.id === "base-sepolia" ? (
+            <div className="flex flex-col gap-1.5">
+              <span>{msg}</span>
+              <a
+                href={FAUCET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-fit font-medium text-accent underline-offset-2 transition-colors duration-150 hover:underline"
+              >
+                Get testnet USDC →
+              </a>
+            </div>
+          ) : (
+            msg
+          ),
         );
         return;
       }

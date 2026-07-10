@@ -158,8 +158,14 @@ export default function Home() {
       .catch(() => token === balReqRef.current && setBalance(null));
   }, [address, chainId]);
 
-  // Re-read on connect / chain switch, and whenever the tab regains focus
-  // (e.g. after topping up at the faucet in another tab).
+  // On account switch, drop the previous account's balance immediately so we
+  // never flash a stale number while the new account's balance loads.
+  useEffect(() => {
+    setBalance(null);
+  }, [address]);
+
+  // Re-read on connect / account / chain switch, and whenever the tab regains
+  // focus (e.g. after topping up at the faucet in another tab).
   useEffect(() => {
     refreshBalance();
     window.addEventListener("focus", refreshBalance);

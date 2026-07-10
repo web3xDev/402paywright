@@ -39,7 +39,7 @@ export function MethodSelect({
           if (open) e.currentTarget.blur();
           setOpen((o) => !o);
         }}
-        className={`field flex h-9 w-full items-center justify-between px-3 font-mono text-sm font-semibold ${METHOD_COLOR[value] ?? ""}`}
+        className={`field flex h-9 w-full items-center justify-between gap-1 px-2 font-mono text-sm font-semibold sm:px-3 ${METHOD_COLOR[value] ?? ""}`}
       >
         {value}
         <svg

@@ -17,6 +17,7 @@ import {
   ACTIVE_CHAIN,
   SAMPLE_ENDPOINTS,
   EXPLORER_TX,
+  EXPLORER_ADDRESS,
 } from "@/lib/constants";
 import { readUsdcBalance, formatUsdc } from "@/lib/balance";
 import { MethodSelect } from "@/components/MethodSelect";
@@ -421,12 +422,14 @@ export default function Home() {
                   label="pay to"
                   value={req.payTo && short(req.payTo)}
                   full={req.payTo ?? undefined}
+                  href={req.payTo ? `${EXPLORER_ADDRESS}${req.payTo}` : undefined}
                   mono
                 />
                 <Field
                   label="asset"
                   value={req.asset && short(req.asset)}
                   full={req.asset ?? undefined}
+                  href={req.asset ? `${EXPLORER_ADDRESS}${req.asset}` : undefined}
                   mono
                 />
                 {req.description && <Field label="note" value={req.description} />}
@@ -593,25 +596,45 @@ function Field({
   value,
   mono,
   full,
+  href,
 }: {
   label: string;
   value?: string | null;
   mono?: boolean;
   /** When set, hovering the value reveals this full string in a tooltip. */
   full?: string;
+  /** When set, the value becomes a link (opens in a new tab). */
+  href?: string;
 }) {
   if (!value) return null;
   const valueClass = `break-all text-foreground ${mono ? "font-mono" : ""}`;
+  const hintClass =
+    "underline decoration-dotted decoration-muted/40 underline-offset-4 transition-colors duration-150";
+  const hasTip = !!full && full !== value;
+
+  const trigger = href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={`${valueClass} ${hintClass} hover:text-accent hover:decoration-accent/70`}
+    >
+      {value}
+    </a>
+  ) : hasTip ? (
+    <span className={`${valueClass} ${hintClass} cursor-default group-hover:decoration-accent/60`}>
+      {value}
+    </span>
+  ) : (
+    <span className={valueClass}>{value}</span>
+  );
+
   return (
     <div className="flex gap-2">
       <span className="w-20 shrink-0 text-muted">{label}</span>
-      {full && full !== value ? (
-        <span className="group relative inline-flex cursor-default">
-          <span
-            className={`${valueClass} underline decoration-dotted decoration-muted/40 underline-offset-4 transition-colors duration-150 group-hover:decoration-accent/60`}
-          >
-            {value}
-          </span>
+      {hasTip ? (
+        <span className="group relative inline-flex">
+          {trigger}
           <span
             role="tooltip"
             className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-max max-w-[min(90vw,22rem)] break-all rounded-md border border-[var(--border)] bg-panel px-2 py-1 font-mono text-xs text-foreground opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100"
@@ -620,7 +643,7 @@ function Field({
           </span>
         </span>
       ) : (
-        <span className={valueClass}>{value}</span>
+        trigger
       )}
     </div>
   );

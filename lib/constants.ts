@@ -15,9 +15,6 @@ export const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 /** Where to grab testnet USDC to pay with. */
 export const FAUCET_URL = "https://faucet.circle.com/";
 
-/** Base Sepolia block explorer — settlement tx links. */
-export const EXPLORER_TX = "https://sepolia.basescan.org/tx/";
-
 /** A few known x402-gated endpoints to try in one click. */
 export const SAMPLE_ENDPOINTS: { label: string; url: string; method: string }[] =
   [
@@ -41,17 +38,23 @@ export type Chain = {
   testnet: boolean;
   /** true = payments actually settle here today (public facilitator). */
   active: boolean;
+  /** Block explorer base URL (no trailing slash) — drives tx/address links. */
+  explorer: string;
 };
 
 // Only Base Sepolia settles today (public x402.org facilitator); the rest are
 // on the roadmap (need a mainnet facilitator).
 export const CHAINS: Chain[] = [
-  { id: "base-sepolia", chainId: 84532, label: "Base Sepolia", testnet: true, active: true },
-  { id: "base", chainId: 8453, label: "Base", testnet: false, active: false },
-  { id: "ethereum", chainId: 1, label: "Ethereum", testnet: false, active: false },
-  { id: "arbitrum", chainId: 42161, label: "Arbitrum", testnet: false, active: false },
-  { id: "polygon", chainId: 137, label: "Polygon", testnet: false, active: false },
+  { id: "base-sepolia", chainId: 84532, label: "Base Sepolia", testnet: true, active: true, explorer: "https://sepolia.basescan.org" },
+  { id: "base", chainId: 8453, label: "Base", testnet: false, active: false, explorer: "https://basescan.org" },
+  { id: "ethereum", chainId: 1, label: "Ethereum", testnet: false, active: false, explorer: "https://etherscan.io" },
+  { id: "arbitrum", chainId: 42161, label: "Arbitrum", testnet: false, active: false, explorer: "https://arbiscan.io" },
+  { id: "polygon", chainId: 137, label: "Polygon", testnet: false, active: false, explorer: "https://polygonscan.com" },
 ];
 
 /** The chain payments run on right now. */
 export const ACTIVE_CHAIN: Chain = CHAINS.find((c) => c.active) ?? CHAINS[0];
+
+/** Block-explorer links for the active chain (tx + address). */
+export const EXPLORER_TX = `${ACTIVE_CHAIN.explorer}/tx/`;
+export const EXPLORER_ADDRESS = `${ACTIVE_CHAIN.explorer}/address/`;

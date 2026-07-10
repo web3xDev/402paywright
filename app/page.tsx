@@ -356,7 +356,7 @@ export default function Home() {
     typeof receipt?.transaction === "string" ? receipt.transaction : null;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-clip">
       {/* Header */}
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4">
         <div className="flex items-center gap-2 text-lg font-bold tracking-tight">

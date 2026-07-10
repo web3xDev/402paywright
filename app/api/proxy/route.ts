@@ -25,6 +25,58 @@ const STRIP = new Set([
   "keep-alive",
 ]);
 
+/**
+ * Same-origin gate: this proxy exists only to serve Paywright's own frontend.
+ * Require the request to come from a page on the same host (Origin, falling
+ * back to Referer) so it can't be used as a general-purpose open proxy by
+ * unrelated sites or scripts. (A non-browser client can forge these headers —
+ * this stops casual/cross-site abuse, not a determined attacker; the rate limit
+ * and SSRF guard are the other layers.)
+ */
+function sameOrigin(req: NextRequest): boolean {
+  const host = req.headers.get("host");
+  if (!host) return false;
+  const source = req.headers.get("origin") ?? req.headers.get("referer");
+  if (!source) return false;
+  try {
+    return new URL(source).host === host;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Crude in-memory sliding-window rate limit, keyed by client IP. Note: on
+ * serverless this is per warm instance, so it bounds bursts rather than being a
+ * global cap — swap in a shared store (Upstash/KV) if stronger limits are
+ * needed. Good enough to blunt scripted abuse without an external dependency.
+ */
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 40;
+const hits = new Map<string, number[]>();
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  hits.set(ip, recent);
+  // Opportunistic cleanup so the map can't grow unbounded.
+  if (hits.size > 5000) {
+    for (const [k, v] of hits) {
+      if (v.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(k);
+    }
+  }
+  return recent.length > RATE_MAX;
+}
+
+function clientIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
 async function safeFetch(
   url: string,
   init: RequestInit,
@@ -49,6 +101,19 @@ async function safeFetch(
 }
 
 export async function POST(req: NextRequest) {
+  // Only Paywright's own frontend may use this proxy.
+  if (!sameOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Throttle bursts per client IP.
+  if (rateLimited(clientIp(req))) {
+    return NextResponse.json(
+      { error: "Too many requests — slow down and try again shortly." },
+      { status: 429, headers: { "retry-after": "30" } },
+    );
+  }
+
   let body: ProxyBody;
   try {
     body = (await req.json()) as ProxyBody;

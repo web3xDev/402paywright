@@ -27,7 +27,7 @@ export function ChainDropdown() {
         }`}
       >
         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ok" />
-        <span className="hidden sm:inline">{ACTIVE_CHAIN.label}</span>
+        <span className="hidden min-[375px]:inline">{ACTIVE_CHAIN.label}</span>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 24 24"

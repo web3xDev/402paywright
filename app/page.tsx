@@ -570,8 +570,22 @@ export default function Home() {
           </div>
         )}
 
+        {/* While probing, show the challenge step as loading instead of the
+            idle placeholder (probe is cleared at the start of onSend). */}
+        {probing && (
+          <section className="mt-6 animate-in">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-sm font-semibold">1 · Payment challenge</span>
+              <span className="h-3.5 w-3.5 animate-spin-slow rounded-full border-2 border-muted border-t-transparent" />
+            </div>
+            <p className="text-sm text-muted">
+              Sending request &amp; decoding the 402 challenge…
+            </p>
+          </section>
+        )}
+
         {/* Probe result — the 402 challenge */}
-        {probe && (
+        {probe && !probing && (
           <section ref={probeSecRef} className="mt-6 animate-in">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold">1 · Payment challenge</span>
@@ -771,7 +785,7 @@ export default function Home() {
           </section>
         )}
 
-        {!probe && (
+        {!probe && !probing && (
           <p className="mt-8 text-center text-sm text-muted">
             Paste an x402 endpoint above and hit Send to see the payment flow.
           </p>

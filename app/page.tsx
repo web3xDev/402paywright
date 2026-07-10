@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useConnection, useWalletClient } from "wagmi";
+import { toast } from "sonner";
 import { ConnectButton } from "@/components/ConnectButton";
 import {
   probeX402,
@@ -109,7 +110,6 @@ export default function Home() {
   const [pay, setPay] = useState<PayResult | null>(null);
   const [probeMs, setProbeMs] = useState<number | null>(null);
   const [payMs, setPayMs] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [respTab, setRespTab] = useState<"body" | "headers" | "receipt">("body");
   const probeSecRef = useRef<HTMLElement>(null);
@@ -160,7 +160,6 @@ export default function Home() {
 
   async function onSend() {
     if (!urlValid) return;
-    setError(null);
     setProbe(null);
     setPay(null);
     setPayMs(null);
@@ -171,7 +170,7 @@ export default function Home() {
       setProbeMs(Date.now() - t0);
       setProbe(r);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      toast.error(e instanceof Error ? e.message : String(e));
     } finally {
       setProbing(false);
     }
@@ -183,13 +182,12 @@ export default function Home() {
     const s = summarize(probe?.requirements);
     if (balance != null && s?.amount && /^\d+$/.test(s.amount)) {
       if (balance < BigInt(s.amount)) {
-        setError(
+        toast.error(
           `Insufficient USDC — you have ${formatUsdc(balance)} but this call costs ${s.usdc ?? s.amount}.`,
         );
         return;
       }
     }
-    setError(null);
     setPay(null);
     setRespTab("body");
     setPaying(true);
@@ -198,8 +196,10 @@ export default function Home() {
       const r = await payX402(walletClient, config);
       setPayMs(Date.now() - t0);
       setPay(r);
+      if (r.ok) toast.success("Payment settled onchain");
+      else if (r.error) toast.error(r.error);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      toast.error(e instanceof Error ? e.message : String(e));
     } finally {
       setPaying(false);
     }
@@ -327,12 +327,6 @@ export default function Home() {
             </button>
           ))}
         </div>
-
-        {error && (
-          <p className="mt-4 rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">
-            {error}
-          </p>
-        )}
 
         {/* Probe result — the 402 challenge */}
         {probe && (
@@ -513,7 +507,7 @@ export default function Home() {
           </section>
         )}
 
-        {!probe && !error && (
+        {!probe && (
           <p className="mt-8 text-center text-sm text-muted">
             Paste an x402 endpoint above and hit Send to see the payment flow.
           </p>

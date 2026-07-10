@@ -31,7 +31,12 @@ export function MethodSelect({
     <div className="relative sm:w-28" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => {
+          // Closing via the trigger keeps :focus, so the field's focus border
+          // would linger until you click elsewhere — blur it on close.
+          if (open) e.currentTarget.blur();
+          setOpen((o) => !o);
+        }}
         className={`field flex h-9 w-full items-center justify-between px-3 font-mono text-sm font-semibold ${METHOD_COLOR[value] ?? ""}`}
       >
         {value}

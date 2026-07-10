@@ -417,8 +417,18 @@ export default function Home() {
                   }
                   mono
                 />
-                <Field label="pay to" value={req.payTo && short(req.payTo)} mono />
-                <Field label="asset" value={req.asset && short(req.asset)} mono />
+                <Field
+                  label="pay to"
+                  value={req.payTo && short(req.payTo)}
+                  full={req.payTo ?? undefined}
+                  mono
+                />
+                <Field
+                  label="asset"
+                  value={req.asset && short(req.asset)}
+                  full={req.asset ?? undefined}
+                  mono
+                />
                 {req.description && <Field label="note" value={req.description} />}
               </div>
             )}
@@ -582,18 +592,36 @@ function Field({
   label,
   value,
   mono,
+  full,
 }: {
   label: string;
   value?: string | null;
   mono?: boolean;
+  /** When set, hovering the value reveals this full string in a tooltip. */
+  full?: string;
 }) {
   if (!value) return null;
+  const valueClass = `break-all text-foreground ${mono ? "font-mono" : ""}`;
   return (
     <div className="flex gap-2">
       <span className="w-20 shrink-0 text-muted">{label}</span>
-      <span className={`break-all text-foreground ${mono ? "font-mono" : ""}`}>
-        {value}
-      </span>
+      {full && full !== value ? (
+        <span className="group relative inline-flex cursor-default">
+          <span
+            className={`${valueClass} underline decoration-dotted decoration-muted/40 underline-offset-4 transition-colors duration-150 group-hover:decoration-accent/60`}
+          >
+            {value}
+          </span>
+          <span
+            role="tooltip"
+            className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-max max-w-[min(90vw,22rem)] break-all rounded-md border border-[var(--border)] bg-panel px-2 py-1 font-mono text-xs text-foreground opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100"
+          >
+            {full}
+          </span>
+        </span>
+      ) : (
+        <span className={valueClass}>{value}</span>
+      )}
     </div>
   );
 }

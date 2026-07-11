@@ -36,7 +36,8 @@ export function ConnectButton() {
         onClick={() => open()}
         className="btn-primary inline-flex h-9 items-center px-4 text-sm"
       >
-        Connect wallet
+        <span className="sm:hidden">Connect</span>
+        <span className="hidden sm:inline">Connect wallet</span>
       </button>
     );
   }

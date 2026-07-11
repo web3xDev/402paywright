@@ -1,7 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import NetworkBaseSepolia from "@web3icons/react/icons/networks/NetworkBaseSepolia";
+import NetworkBase from "@web3icons/react/icons/networks/NetworkBase";
+import NetworkEthereum from "@web3icons/react/icons/networks/NetworkEthereum";
+import NetworkArbitrumOne from "@web3icons/react/icons/networks/NetworkArbitrumOne";
+import NetworkPolygon from "@web3icons/react/icons/networks/NetworkPolygon";
 import { CHAINS, ACTIVE_CHAIN } from "@/lib/constants";
+
+type IconProps = {
+  size?: number;
+  variant?: "branded" | "mono" | "background";
+  className?: string;
+};
+
+const ICONS: Record<string, React.ComponentType<IconProps>> = {
+  "base-sepolia": NetworkBaseSepolia,
+  base: NetworkBase,
+  ethereum: NetworkEthereum,
+  arbitrum: NetworkArbitrumOne,
+  polygon: NetworkPolygon,
+};
+
+function ChainIcon({ id, size }: { id: string; size: number }) {
+  const Icon = ICONS[id];
+  return Icon ? (
+    <Icon size={size} variant="branded" className="shrink-0" />
+  ) : null;
+}
 
 export function ChainDropdown() {
   const [open, setOpen] = useState(false);
@@ -19,17 +45,22 @@ export function ChainDropdown() {
     <div className="relative" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
-        className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2 text-xs font-medium transition-colors duration-150 min-[375px]:gap-2 min-[375px]:px-3 min-[375px]:text-sm ${
+        onClick={(e) => {
+          if (open) e.currentTarget.blur();
+          setOpen((o) => !o);
+        }}
+        className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-sm font-medium transition-colors duration-150 min-[480px]:gap-2 min-[480px]:px-3 ${
           open
             ? "border-accent"
             : "border-[var(--border)] hover:border-accent/50 hover:bg-accent/[0.06]"
         }`}
       >
-        <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-ok" />
-        <span className="whitespace-nowrap">{ACTIVE_CHAIN.label}</span>
+        <ChainIcon id={ACTIVE_CHAIN.id} size={18} />
+        <span className="hidden whitespace-nowrap min-[480px]:inline">
+          {ACTIVE_CHAIN.label}
+        </span>
         <svg
-          className={`-ml-1 h-3.5 w-3.5 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform min-[480px]:-ml-1 ${open ? "rotate-180" : ""}`}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -45,7 +76,7 @@ export function ChainDropdown() {
       {/* Kept mounted so the open/close transition runs both ways. */}
       <div
         aria-hidden={!open}
-        className={`absolute right-0 z-30 mt-2 w-52 origin-top-right overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
+        className={`absolute right-0 z-30 mt-2 w-56 origin-top-right overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
@@ -65,9 +96,7 @@ export function ChainDropdown() {
             }`}
           >
             <span className="flex items-center gap-2">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${c.active ? "bg-ok animate-pulse-dot" : "bg-muted"}`}
-              />
+              <ChainIcon id={c.id} size={18} />
               {c.label}
             </span>
             {c.active ? (

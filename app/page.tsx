@@ -361,7 +361,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip">
       {/* Header */}
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-5 py-4">
         <button
           type="button"
           onClick={onReset}

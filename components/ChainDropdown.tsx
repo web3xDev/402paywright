@@ -76,7 +76,7 @@ export function ChainDropdown() {
       {/* Kept mounted so the open/close transition runs both ways. */}
       <div
         aria-hidden={!open}
-        className={`absolute right-0 z-30 mt-2 w-56 origin-top-right overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
+        className={`absolute right-0 z-30 mt-2 w-52 origin-top-right overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out min-[400px]:w-56 ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
@@ -96,6 +96,13 @@ export function ChainDropdown() {
             }`}
           >
             <span className="flex items-center gap-2">
+              {/* Green pulse dot marks the live chain; empty slot keeps the
+                  icons aligned on the coming-soon rows. */}
+              {c.active ? (
+                <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-ok" />
+              ) : (
+                <span className="h-1.5 w-1.5 shrink-0" />
+              )}
               <ChainIcon id={c.id} size={18} />
               {c.label}
             </span>

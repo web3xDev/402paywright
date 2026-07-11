@@ -1,7 +1,7 @@
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)]">
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-muted sm:flex-row">
+      <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-5 py-6 text-xs text-muted sm:flex-row sm:items-center">
         <span className="flex items-center gap-2">
           <span className="grid h-5 w-7 place-items-center rounded bg-accent font-mono text-[10px] font-bold text-[#1a0e08]">
             402
@@ -11,7 +11,7 @@ export function Footer() {
             the Postman for x402
           </span>
         </span>
-        <div className="flex flex-col items-center gap-2 min-[360px]:flex-row min-[360px]:gap-5">
+        <div className="flex flex-col items-start gap-2 min-[360px]:flex-row min-[360px]:items-center min-[360px]:gap-5">
           <a
             href="https://flash402.xyz"
             target="_blank"

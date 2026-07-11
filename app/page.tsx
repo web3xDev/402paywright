@@ -384,7 +384,7 @@ export default function Home() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-24 pt-6">
         <div className="mb-5">
           <div className="flex flex-wrap items-center gap-2 min-[350px]:gap-2.5">
-            <h1 className="text-xl font-semibold tracking-tight">
+            <h1 className="text-lg font-semibold tracking-tight min-[350px]:text-xl">
               Test any <span className="text-accent">x402</span> endpoint
             </h1>
             {ACTIVE_CHAIN.testnet && (

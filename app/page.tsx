@@ -366,7 +366,7 @@ export default function Home() {
           type="button"
           onClick={onReset}
           aria-label="Paywright — reset"
-          className="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity duration-150 hover:opacity-80"
+          className="flex items-center gap-2 text-base font-bold tracking-tight transition-opacity duration-150 hover:opacity-80 min-[375px]:text-lg"
         >
           <span className="grid h-6 w-9 place-items-center rounded bg-accent font-mono text-xs font-bold text-[#1a0e08]">
             402

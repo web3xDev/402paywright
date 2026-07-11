@@ -20,14 +20,14 @@ export function ChainDropdown() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors duration-150 ${
+        className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2 text-xs font-medium transition-colors duration-150 min-[375px]:gap-2 min-[375px]:px-3 min-[375px]:text-sm ${
           open
             ? "border-accent"
             : "border-[var(--border)] hover:border-accent/50 hover:bg-accent/[0.06]"
         }`}
       >
-        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-ok" />
-        <span className="hidden min-[375px]:inline">{ACTIVE_CHAIN.label}</span>
+        <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-ok" />
+        <span className="whitespace-nowrap">{ACTIVE_CHAIN.label}</span>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 24 24"

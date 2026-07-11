@@ -49,7 +49,7 @@ export function ChainDropdown() {
           if (open) e.currentTarget.blur();
           setOpen((o) => !o);
         }}
-        className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-sm font-medium transition-colors duration-150 min-[480px]:gap-2 min-[480px]:px-3 ${
+        className={`inline-flex h-9 items-center gap-1 rounded-lg border px-2 text-sm font-medium transition-colors duration-150 min-[480px]:gap-2 min-[480px]:px-3 ${
           open
             ? "border-accent"
             : "border-[var(--border)] hover:border-accent/50 hover:bg-accent/[0.06]"

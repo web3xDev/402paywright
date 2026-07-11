@@ -11,7 +11,7 @@ export function Footer() {
             the Postman for x402
           </span>
         </span>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-col items-center gap-2 min-[360px]:flex-row min-[360px]:gap-5">
           <a
             href="https://flash402.xyz"
             target="_blank"

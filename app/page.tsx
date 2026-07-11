@@ -412,7 +412,7 @@ export default function Home() {
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSend()}
                 placeholder="https://api.example.com/paid-endpoint"
-                className="field h-9 min-w-0 flex-1 px-3 font-mono text-sm placeholder:text-muted"
+                className="field h-9 min-w-0 flex-1 px-3 font-mono text-[13px] placeholder:text-muted sm:text-sm"
               />
             </div>
             <div className="flex gap-2">

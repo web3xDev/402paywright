@@ -383,13 +383,13 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-24 pt-6">
         <div className="mb-5">
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 min-[350px]:gap-2.5">
             <h1 className="text-xl font-semibold tracking-tight">
               Test any <span className="text-accent">x402</span> endpoint
             </h1>
             {ACTIVE_CHAIN.testnet && (
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent-2">
-                <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent-2" />
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-0.5 font-mono text-[10px] text-accent-2 min-[350px]:gap-1.5 min-[350px]:px-2.5 min-[350px]:py-1 min-[350px]:text-xs">
+                <span className="h-1 w-1 animate-pulse-dot rounded-full bg-accent-2 min-[350px]:h-1.5 min-[350px]:w-1.5" />
                 testnet
               </span>
             )}

@@ -23,6 +23,9 @@ const STRIP = new Set([
   "transfer-encoding",
   "connection",
   "keep-alive",
+  // Never let an arbitrary target set cookies on our origin.
+  "set-cookie",
+  "set-cookie2",
 ]);
 
 /**

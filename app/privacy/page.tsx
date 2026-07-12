@@ -61,7 +61,7 @@ export default function PrivacyPage() {
           settlement
         </li>
         <li>Block explorers, for the links to transactions and addresses</li>
-        <li>Vercel, for hosting and usage analytics</li>
+        <li>Vercel, for hosting</li>
       </ul>
       <p>Your use of those services is subject to their own policies.</p>
 
@@ -76,9 +76,8 @@ export default function PrivacyPage() {
           events for usage analytics.
         </li>
         <li>
-          Vercel, our host, may collect aggregated, privacy-friendly usage
-          analytics (such as page views, referrer, and device type) along with
-          standard server logs.
+          Vercel, our host, keeps standard server logs (such as IP address and
+          request metadata), as any web host does.
         </li>
       </ul>
       <p>

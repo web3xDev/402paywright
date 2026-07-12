@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useConnection, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import { ConnectButton } from "@/components/ConnectButton";
@@ -71,13 +71,69 @@ function summarize(req: unknown) {
   };
 }
 
+// Match JSON string literals, keywords, and numbers. Punctuation and
+// whitespace fall through as plain (muted) text.
+const JSON_TOKEN = /"(?:\\.|[^"\\])*"|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g;
+
+/**
+ * Lightweight JSON syntax highlighter. Returns React nodes (never raw HTML) so
+ * untrusted response bodies stay escaped by React — no XSS surface.
+ */
+function highlightJson(src: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let last = 0;
+  let key = 0;
+  let m: RegExpExecArray | null;
+  JSON_TOKEN.lastIndex = 0;
+  while ((m = JSON_TOKEN.exec(src)) !== null) {
+    if (m.index > last) nodes.push(src.slice(last, m.index));
+    const tok = m[0];
+    let cls: string;
+    if (tok[0] === '"') {
+      // A string followed by ":" is an object key.
+      cls = /^\s*:/.test(src.slice(m.index + tok.length))
+        ? "text-blue"
+        : "text-ok";
+    } else if (tok === "true" || tok === "false" || tok === "null") {
+      cls = "text-purple";
+    } else {
+      cls = "text-accent-2";
+    }
+    nodes.push(
+      <span key={key++} className={cls}>
+        {tok}
+      </span>,
+    );
+    last = m.index + tok.length;
+  }
+  if (last < src.length) nodes.push(src.slice(last));
+  return nodes;
+}
+
 function Json({ value }: { value: unknown }) {
-  const text =
-    typeof value === "string" ? value : JSON.stringify(value, null, 2);
+  // Normalize to a display string; parse JSON-in-a-string so it pretty-prints
+  // and highlights. Non-JSON text renders as-is.
+  let text: string;
+  let isJson: boolean;
+  if (typeof value === "string") {
+    try {
+      text = JSON.stringify(JSON.parse(value), null, 2);
+      isJson = true;
+    } catch {
+      text = value;
+      isJson = false;
+    }
+  } else {
+    text = JSON.stringify(value, null, 2);
+    isJson = true;
+  }
+  // Skip highlighting for very large payloads to keep rendering snappy.
+  const highlight = isJson && text.length > 0 && text.length < 20000;
+
   return (
     <div className="relative">
       <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap wrap-anywhere rounded-lg border border-[var(--border)] bg-black/30 p-3 pr-10 font-mono text-xs leading-relaxed text-muted">
-        {text || "(empty)"}
+        {highlight ? highlightJson(text) : text || "(empty)"}
       </pre>
       {text && (
         <CopyButton

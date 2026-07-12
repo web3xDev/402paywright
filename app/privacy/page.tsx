@@ -61,17 +61,30 @@ export default function PrivacyPage() {
           settlement
         </li>
         <li>Block explorers, for the links to transactions and addresses</li>
-        <li>Vercel, for hosting</li>
+        <li>Vercel, for hosting and usage analytics</li>
       </ul>
       <p>Your use of those services is subject to their own policies.</p>
 
       <h2>Analytics</h2>
       <p>
-        Paywright does not run its own first-party analytics or tracking
-        cookies. Wallet connection events are processed by Reown, our
-        wallet-connection provider, for usage analytics. That data is handled
-        under Reown&apos;s privacy policy. If we add anything else, we will
-        update this page.
+        Paywright does not run its own custom analytics or tracking cookies, but
+        some usage data is collected by the services it runs on:
+      </p>
+      <ul>
+        <li>
+          Reown, our wallet-connection provider, processes wallet connection
+          events for usage analytics.
+        </li>
+        <li>
+          Vercel, our host, may collect aggregated, privacy-friendly usage
+          analytics (such as page views, referrer, and device type) along with
+          standard server logs.
+        </li>
+      </ul>
+      <p>
+        This data is handled under those providers&apos; own privacy policies.
+        We use it only to understand usage and keep Paywright running. If we add
+        anything else, we will update this page.
       </p>
 
       <h2>Testnet</h2>

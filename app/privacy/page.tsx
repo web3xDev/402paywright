@@ -67,8 +67,11 @@ export default function PrivacyPage() {
 
       <h2>Analytics</h2>
       <p>
-        Paywright does not currently use analytics or tracking cookies. If this
-        changes, we will update this page.
+        Paywright does not run its own first-party analytics or tracking
+        cookies. Wallet connection events are processed by Reown, our
+        wallet-connection provider, for usage analytics. That data is handled
+        under Reown&apos;s privacy policy. If we add anything else, we will
+        update this page.
       </p>
 
       <h2>Testnet</h2>

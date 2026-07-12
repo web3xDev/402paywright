@@ -1,7 +1,9 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)]">
-      <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-5 py-6 text-xs text-muted sm:flex-row sm:items-center">
+      <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-5 pb-4 pt-6 text-xs text-muted sm:flex-row sm:items-center">
         <span className="flex items-center gap-2">
           <span className="grid h-5 w-7 place-items-center rounded bg-accent font-mono text-[10px] font-bold text-[#1a0e08]">
             402
@@ -48,6 +50,20 @@ export function Footer() {
             </a>
           </span>
         </div>
+      </div>
+      <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 pb-6 text-xs text-muted">
+        <Link
+          href="/privacy"
+          className="transition-colors duration-150 hover:text-foreground"
+        >
+          Privacy
+        </Link>
+        <Link
+          href="/terms"
+          className="transition-colors duration-150 hover:text-foreground"
+        >
+          Terms
+        </Link>
       </div>
     </footer>
   );

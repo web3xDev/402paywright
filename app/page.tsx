@@ -828,7 +828,7 @@ export default function Home() {
         )}
 
         {!probe && !probing && (
-          <p className="mt-8 text-center text-sm text-muted">
+          <p className="mt-8 text-center text-[13px] text-muted sm:text-sm">
             Paste an x402 endpoint above and hit Send to see the payment flow.
           </p>
         )}

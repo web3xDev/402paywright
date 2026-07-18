@@ -103,6 +103,48 @@ async function safeFetch(
   throw new Error("too many redirects");
 }
 
+// Cap on the proxied response body. The target is fully user-supplied, so an
+// oversized or endless body would otherwise be buffered whole into memory and
+// exhaust the serverless function. 10 MB is plenty for any API response.
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Read the upstream body with a hard byte cap. Rejects early when the upstream
+ * advertises an oversized Content-Length, and otherwise streams and bails the
+ * moment the cap is crossed. Returns null when the body is too large.
+ */
+async function readBodyCapped(
+  res: Response,
+  cap: number,
+): Promise<ArrayBuffer | null> {
+  const declared = Number(res.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > cap) return null;
+  if (!res.body) return new ArrayBuffer(0);
+
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.length;
+      if (total > cap) return null;
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+  }
+
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.length;
+  }
+  return out.buffer;
+}
+
 export async function POST(req: NextRequest) {
   // Only Paywright's own frontend may use this proxy.
   if (!sameOrigin(req)) {
@@ -153,7 +195,26 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const buf = await upstream.arrayBuffer();
+  let buf: ArrayBuffer | null;
+  try {
+    buf = await readBodyCapped(upstream, MAX_BODY_BYTES);
+  } catch {
+    return NextResponse.json(
+      { error: "Failed reading the upstream response" },
+      { status: 502 },
+    );
+  }
+  if (buf === null) {
+    return NextResponse.json(
+      {
+        error: `Response too large — Paywright caps proxied responses at ${
+          MAX_BODY_BYTES / (1024 * 1024)
+        } MB.`,
+      },
+      { status: 413 },
+    );
+  }
+
   const res = new NextResponse(buf, { status: upstream.status });
   upstream.headers.forEach((value, key) => {
     if (!STRIP.has(key.toLowerCase())) res.headers.set(key, value);

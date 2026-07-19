@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useMenuKeyboard } from "@/hooks/use-menu-keyboard";
 
 export const METHOD_COLOR: Record<string, string> = {
   GET: "text-ok",
@@ -19,20 +20,21 @@ export function MethodSelect({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
+    useMenuKeyboard({
+      open,
+      setOpen,
+      count: methods.length,
+      initialIndex: Math.max(0, methods.indexOf(value)),
+      role: "menu",
+    });
 
   return (
-    <div className={`relative sm:w-28 ${className ?? ""}`} ref={ref}>
+    <div className={`relative sm:w-28 ${className ?? ""}`} ref={containerRef}>
       <button
         type="button"
+        ref={triggerRef}
+        {...triggerProps}
         onClick={(e) => {
           // Closing via the trigger keeps :focus, so the field's focus border
           // would linger until you click elsewhere — blur it on close.
@@ -58,23 +60,26 @@ export function MethodSelect({
 
       {/* Kept mounted so the open/close transition runs both ways. */}
       <div
-        aria-hidden={!open}
+        {...menuProps}
+        aria-label="HTTP method"
         className={`absolute left-0 z-30 mt-1.5 w-full min-w-28 origin-top overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
         }`}
       >
-        {methods.map((m) => (
+        {methods.map((m, i) => (
           <button
             key={m}
             type="button"
-            tabIndex={open ? 0 : -1}
+            {...getItemProps(i)}
+            role="menuitemradio"
+            aria-checked={m === value}
             onClick={() => {
               onChange(m);
               setOpen(false);
             }}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 font-mono text-sm font-semibold transition-colors hover:bg-white/5 ${METHOD_COLOR[m] ?? ""}`}
+            className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 font-mono text-sm font-semibold outline-none transition-colors hover:bg-white/5 focus:bg-white/10 ${METHOD_COLOR[m] ?? ""}`}
           >
             {m}
             {m === value && <span className="text-muted">✓</span>}

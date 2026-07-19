@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useMenuKeyboard } from "@/hooks/use-menu-keyboard";
 import NetworkBaseSepolia from "@web3icons/react/icons/networks/NetworkBaseSepolia";
 import NetworkBase from "@web3icons/react/icons/networks/NetworkBase";
 import NetworkEthereum from "@web3icons/react/icons/networks/NetworkEthereum";
@@ -31,20 +32,23 @@ function ChainIcon({ id, size }: { id: string; size: number }) {
 
 export function ChainDropdown() {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
+    useMenuKeyboard({
+      open,
+      setOpen,
+      count: CHAINS.length,
+      isDisabled: (i) => !CHAINS[i].active,
+      initialIndex: Math.max(0, CHAINS.findIndex((c) => c.active)),
+      role: "menu",
+    });
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={containerRef}>
       <button
         type="button"
+        ref={triggerRef}
+        {...triggerProps}
+        aria-label={`Network: ${ACTIVE_CHAIN.label}`}
         onClick={(e) => {
           if (open) e.currentTarget.blur();
           setOpen((o) => !o);
@@ -75,23 +79,26 @@ export function ChainDropdown() {
 
       {/* Kept mounted so the open/close transition runs both ways. */}
       <div
-        aria-hidden={!open}
+        {...menuProps}
+        aria-label="Network"
         className={`absolute right-0 z-30 mt-2 w-52 origin-top-right overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out min-[400px]:w-56 ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
         }`}
       >
-        {CHAINS.map((c) => (
+        {CHAINS.map((c, i) => (
           <button
             key={c.id}
             type="button"
+            {...getItemProps(i)}
+            role="menuitemradio"
             disabled={!c.active}
-            tabIndex={open ? 0 : -1}
+            aria-checked={c.id === ACTIVE_CHAIN.id}
             onClick={() => c.active && setOpen(false)}
-            className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm transition-colors duration-150 ${
+            className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none transition-colors duration-150 ${
               c.active
-                ? "text-foreground enabled:hover:bg-white/5"
+                ? "text-foreground enabled:hover:bg-white/5 focus:bg-white/5"
                 : "cursor-not-allowed opacity-40"
             }`}
           >

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useMenuKeyboard } from "@/hooks/use-menu-keyboard";
 
 type Sample = { label: string; url: string; method: string };
 
@@ -14,20 +15,20 @@ export function SampleDropdown({
   onSelect: (s: Sample) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
+    useMenuKeyboard({
+      open,
+      setOpen,
+      count: samples.length,
+      role: "menu",
+    });
 
   return (
-    <div className="relative w-full" ref={ref}>
+    <div className="relative w-full" ref={containerRef}>
       <button
         type="button"
+        ref={triggerRef}
+        {...triggerProps}
         onClick={(e) => {
           if (open) e.currentTarget.blur();
           setOpen((o) => !o);
@@ -55,23 +56,25 @@ export function SampleDropdown({
 
       {/* Kept mounted so the open/close transition runs both ways. */}
       <div
-        aria-hidden={!open}
+        {...menuProps}
+        aria-label="Sample endpoints"
         className={`absolute left-0 z-30 mt-1.5 w-full origin-top overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
         }`}
       >
-        {samples.map((s) => (
+        {samples.map((s, i) => (
           <button
             key={s.url}
             type="button"
-            tabIndex={open ? 0 : -1}
+            {...getItemProps(i)}
+            role="menuitem"
             onClick={() => {
               onSelect(s);
               setOpen(false);
             }}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-foreground transition-colors duration-150 hover:bg-white/5"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-foreground outline-none transition-colors duration-150 hover:bg-white/5 focus:bg-white/10"
           >
             <span className="font-mono text-[10px] text-accent-2">{s.method}</span>
             <span className="truncate">{s.label}</span>

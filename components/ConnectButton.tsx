@@ -21,7 +21,7 @@ function Avatar({ address }: { address: string }) {
         backgroundImage: `linear-gradient(135deg, hsl(${h1} 65% 55%), hsl(${h2} 70% 45%))`,
       }}
     >
-      <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 animate-pulse-dot rounded-full border-2 border-[var(--background)] bg-ok" />
+      <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-[var(--background)] bg-ok" />
     </span>
   );
 }

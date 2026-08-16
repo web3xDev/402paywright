@@ -96,12 +96,6 @@ button:disabled {
   background: rgba(255, 108, 55, 0.06);
 }
 
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -118,20 +112,6 @@ button:disabled {
   to { opacity: 1; transform: translateY(0); }
 }
 .tab-enter { animation: tab-enter 0.22s ease-out both; }
-
-/* Faucet nudge: when the wallet has 0 USDC, pulse the "Need testnet USDC?"
- * link between its resting (muted) and hover (foreground) colors to draw
- * the eye. Same lit color as the link's :hover state. */
-@keyframes faucet-pulse {
-  0%, 100% { color: var(--muted); }
-  50% { color: var(--foreground); }
-}
-.animate-faucet-pulse { animation: faucet-pulse 1.8s ease-in-out infinite; }
-/* Stop the pulse on hover so the link settles on its lit (foreground) color.
- * Defined here (unlayered) alongside the animation so it wins over it —
- * Tailwind's hover:animate-none sits in the utilities layer and would lose
- * to this unlayered rule regardless of specificity. */
-.animate-faucet-pulse:hover { animation: none; }
 
 /*
  * Sonner disables its own enter/exit transitions under prefers-reduced-motion

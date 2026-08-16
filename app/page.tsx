@@ -445,7 +445,7 @@ export default function Home() {
             </h1>
             {ACTIVE_CHAIN.testnet && (
               <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-0.5 font-mono text-[10px] text-accent-2 min-[350px]:gap-1.5 min-[350px]:px-2.5 min-[350px]:py-1 min-[350px]:text-xs">
-                <span className="h-1 w-1 animate-pulse-dot rounded-full bg-accent-2 min-[350px]:h-1.5 min-[350px]:w-1.5" />
+                <span className="h-1 w-1 rounded-full bg-accent-2 min-[350px]:h-1.5 min-[350px]:w-1.5" />
                 testnet
               </span>
             )}
@@ -794,9 +794,7 @@ export default function Home() {
                   href={FAUCET_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className={`text-xs text-muted underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline ${
-                    balance === 0n ? "animate-faucet-pulse" : ""
-                  }`}
+                  className="text-xs text-muted underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline"
                 >
                   Need testnet USDC?
                 </a>

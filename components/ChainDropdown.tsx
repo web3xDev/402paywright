@@ -103,10 +103,10 @@ export function ChainDropdown() {
             }`}
           >
             <span className="flex items-center gap-2">
-              {/* Green pulse dot marks the live chain; empty slot keeps the
+              {/* Green dot marks the live chain; empty slot keeps the
                   icons aligned on the coming-soon rows. */}
               {c.active ? (
-                <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-ok" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ok" />
               ) : (
                 <span className="h-1.5 w-1.5 shrink-0" />
               )}

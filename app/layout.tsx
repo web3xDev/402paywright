@@ -11,7 +11,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://paywright.xyz";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.paywright.xyz";
 const TITLE = "Paywright — the Postman for x402";
 const DESCRIPTION =
   "Paste an x402 endpoint, connect a wallet, and run the full 402 → sign → 200 flow. Decode payment requirements, pay in USDC, and inspect the settlement receipt.";

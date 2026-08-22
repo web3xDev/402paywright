@@ -20,7 +20,7 @@ export function MethodSelect({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
+  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps, close } =
     useMenuKeyboard({
       open,
       setOpen,
@@ -77,7 +77,7 @@ export function MethodSelect({
             aria-checked={m === value}
             onClick={() => {
               onChange(m);
-              setOpen(false);
+              close(false);
             }}
             className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 font-mono text-sm font-semibold outline-none transition-colors hover:bg-white/5 focus:bg-white/10 ${METHOD_COLOR[m] ?? ""}`}
           >

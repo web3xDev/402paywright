@@ -151,6 +151,14 @@ export function useMenuKeyboard({
     containerRef,
     triggerRef,
     activeIndex,
+    /** Call after a selection instead of `setOpen(false)` directly — also
+     *  blurs whatever item still has real DOM focus. Without it, a row that
+     *  was keyboard-focused (e.g. the previous selection, focused when the
+     *  menu opened) keeps that focus after you click a different row —
+     *  clicking a button doesn't reliably move focus on every platform
+     *  (notably macOS Safari/Chrome) — so its `focus:` highlight stays
+     *  visually "stuck" even though it's no longer selected. */
+    close,
     /** Spread onto the trigger <button>. */
     triggerProps: {
       onKeyDown: onTriggerKeyDown,

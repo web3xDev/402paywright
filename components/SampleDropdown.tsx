@@ -15,7 +15,7 @@ export function SampleDropdown({
   onSelect: (s: Sample) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
+  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps, close } =
     useMenuKeyboard({
       open,
       setOpen,
@@ -72,7 +72,7 @@ export function SampleDropdown({
             role="menuitem"
             onClick={() => {
               onSelect(s);
-              setOpen(false);
+              close(false);
             }}
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-foreground outline-none transition-colors duration-150 hover:bg-white/5 focus:bg-white/10"
           >

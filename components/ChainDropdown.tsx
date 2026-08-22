@@ -37,13 +37,21 @@ export function ChainDropdown() {
   const { chain, setChainId } = useChain();
   const { address } = useConnection();
   const { mutate: switchChain } = useSwitchChain();
-  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
+  const { containerRef, triggerRef, triggerProps, menuProps, getItemProps, close } =
     useMenuKeyboard({
       open,
       setOpen,
       count: CHAINS.length,
       isDisabled: (i) => !CHAINS[i].active,
-      initialIndex: Math.max(0, CHAINS.findIndex((c) => c.active)),
+      // Land keyboard focus on whatever chain is actually selected, not just
+      // "the first active row" — with only one chain active that used to be
+      // the same thing, but now (Base Sepolia + Base both active) it isn't,
+      // and landing on the wrong row made that row's `focus:` highlight
+      // stick even after switching to a different chain.
+      initialIndex: Math.max(
+        0,
+        CHAINS.findIndex((c) => c.id === chain.id),
+      ),
       role: "menu",
     });
 
@@ -52,7 +60,7 @@ export function ChainDropdown() {
   // right after picking a chain from here.
   function selectChain(id: string) {
     setChainId(id);
-    setOpen(false);
+    close(false);
     if (address) {
       const target = CHAINS.find((c) => c.id === id);
       if (target) switchChain({ chainId: target.chainId });

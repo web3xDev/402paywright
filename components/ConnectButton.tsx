@@ -2,7 +2,7 @@
 
 import { useAppKit } from "@reown/appkit/react";
 import { useConnection } from "wagmi";
-import { CHAIN_ID } from "@/lib/constants";
+import { useChain } from "@/lib/chain-context";
 
 function short(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
@@ -29,6 +29,7 @@ function Avatar({ address }: { address: string }) {
 export function ConnectButton() {
   const { open } = useAppKit();
   const { address, chainId } = useConnection();
+  const { chain } = useChain();
 
   if (!address) {
     return (
@@ -42,7 +43,7 @@ export function ConnectButton() {
     );
   }
 
-  const wrongChain = chainId !== CHAIN_ID;
+  const wrongChain = chainId !== chain.chainId;
 
   return (
     <div className="flex items-center gap-2">
@@ -51,7 +52,7 @@ export function ConnectButton() {
           onClick={() => open({ view: "Networks" })}
           className="inline-flex h-9 items-center rounded-lg border border-accent-2/50 bg-accent-2/10 px-3 text-xs font-medium text-accent-2"
         >
-          <span className="hidden sm:inline">Switch to Base Sepolia</span>
+          <span className="hidden sm:inline">Switch to {chain.label}</span>
           <span className="sm:hidden">Wrong network</span>
         </button>
       )}

@@ -1,11 +1,16 @@
 import { cookieStorage, createStorage } from "wagmi";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { baseSepolia } from "@reown/appkit/networks";
+import { base, baseSepolia } from "@reown/appkit/networks";
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID ?? "";
 
-/** Chains offered in the Reown AppKit modal. Base Sepolia for now. */
-export const networks = [baseSepolia];
+/**
+ * Both networks are offered — which one is "active" for balance/payment
+ * purposes is a runtime choice made in lib/chain-context.tsx, not fixed
+ * here. Listing both lets the wallet modal offer either, and lets our own
+ * chain dropdown drive a switch between them via wagmi's useSwitchChain.
+ */
+export const networks: [typeof baseSepolia, typeof base] = [baseSepolia, base];
 
 /**
  * wagmi config produced by the Reown AppKit adapter. SSR-safe cookie storage

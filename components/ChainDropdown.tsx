@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useConnection, useSwitchChain } from "wagmi";
 import { useMenuKeyboard } from "@/hooks/use-menu-keyboard";
 import NetworkBaseSepolia from "@web3icons/react/icons/networks/NetworkBaseSepolia";
 import NetworkBase from "@web3icons/react/icons/networks/NetworkBase";
 import NetworkEthereum from "@web3icons/react/icons/networks/NetworkEthereum";
 import NetworkArbitrumOne from "@web3icons/react/icons/networks/NetworkArbitrumOne";
 import NetworkPolygon from "@web3icons/react/icons/networks/NetworkPolygon";
-import { CHAINS, ACTIVE_CHAIN } from "@/lib/constants";
+import { CHAINS } from "@/lib/constants";
+import { useChain } from "@/lib/chain-context";
 
 type IconProps = {
   size?: number;
@@ -32,6 +34,9 @@ function ChainIcon({ id, size }: { id: string; size: number }) {
 
 export function ChainDropdown() {
   const [open, setOpen] = useState(false);
+  const { chain, setChainId } = useChain();
+  const { address } = useConnection();
+  const { mutate: switchChain } = useSwitchChain();
   const { containerRef, triggerRef, triggerProps, menuProps, getItemProps } =
     useMenuKeyboard({
       open,
@@ -42,13 +47,25 @@ export function ChainDropdown() {
       role: "menu",
     });
 
+  // Switch the app's active chain, and — if a wallet is already connected —
+  // prompt it to switch too, so the "wrong network" banner doesn't show up
+  // right after picking a chain from here.
+  function selectChain(id: string) {
+    setChainId(id);
+    setOpen(false);
+    if (address) {
+      const target = CHAINS.find((c) => c.id === id);
+      if (target) switchChain({ chainId: target.chainId });
+    }
+  }
+
   return (
     <div className="relative" ref={containerRef}>
       <button
         type="button"
         ref={triggerRef}
         {...triggerProps}
-        aria-label={`Network: ${ACTIVE_CHAIN.label}`}
+        aria-label={`Network: ${chain.label}`}
         onClick={(e) => {
           if (open) e.currentTarget.blur();
           setOpen((o) => !o);
@@ -59,9 +76,9 @@ export function ChainDropdown() {
             : "border-[var(--border)] hover:border-accent/50 hover:bg-accent/[0.06]"
         }`}
       >
-        <ChainIcon id={ACTIVE_CHAIN.id} size={18} />
+        <ChainIcon id={chain.id} size={18} />
         <span className="hidden whitespace-nowrap min-[480px]:inline">
-          {ACTIVE_CHAIN.label}
+          {chain.label}
         </span>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform min-[480px]:-ml-1 ${open ? "rotate-180" : ""}`}
@@ -81,7 +98,7 @@ export function ChainDropdown() {
       <div
         {...menuProps}
         aria-label="Network"
-        className={`absolute right-0 z-30 mt-2 w-52 origin-top-right overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out min-[400px]:w-56 ${
+        className={`absolute right-0 z-30 mt-2 flex w-52 origin-top-right flex-col gap-0.5 overflow-hidden rounded-lg border border-[var(--border)] bg-panel p-1 shadow-xl transition duration-150 ease-out min-[400px]:w-56 ${
           open
             ? "scale-100 opacity-100"
             : "pointer-events-none -translate-y-1 scale-95 opacity-0"
@@ -94,18 +111,22 @@ export function ChainDropdown() {
             {...getItemProps(i)}
             role="menuitemradio"
             disabled={!c.active}
-            aria-checked={c.id === ACTIVE_CHAIN.id}
-            onClick={() => c.active && setOpen(false)}
-            className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none transition-colors duration-150 ${
-              c.active
-                ? "text-foreground enabled:hover:bg-white/5 focus:bg-white/5"
-                : "cursor-not-allowed opacity-40"
+            aria-checked={c.id === chain.id}
+            onClick={() => c.active && selectChain(c.id)}
+            className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm outline-none transition-colors duration-150 ${
+              c.id === chain.id
+                ? "bg-white/10 text-foreground"
+                : c.active
+                  ? "text-foreground enabled:hover:bg-white/5 focus:bg-white/5"
+                  : "cursor-not-allowed opacity-40"
             }`}
           >
             <span className="flex items-center gap-2">
-              {/* Green dot marks the live chain; empty slot keeps the
-                  icons aligned on the coming-soon rows. */}
-              {c.active ? (
+              {/* Green dot marks the currently selected chain (not just
+                  "selectable" — now that more than one row is active,
+                  that would light up every enabled row at once). Empty
+                  slot keeps the icons aligned on the coming-soon rows. */}
+              {c.id === chain.id ? (
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ok" />
               ) : (
                 <span className="h-1.5 w-1.5 shrink-0" />

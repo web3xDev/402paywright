@@ -65,7 +65,7 @@ Open [localhost:3000](http://localhost:3000), connect a wallet with **Base Sepol
 
 ## Notes
 
-- Runs on **Base Sepolia** (the network the public [x402.org](https://x402.org) facilitator settles on). Multichain is on the roadmap.
+- Defaults to **Base Sepolia** (the network the public [x402.org](https://x402.org) facilitator settles on); switch to **Base mainnet** anytime from the chain dropdown — network id, USDC address, wallet chain, balance reads, and UI copy all follow. Mainnet payments are real and final, and only settle if the endpoint you're testing has its own mainnet-capable facilitator wired up (Paywright doesn't provide one — see [`lib/constants.ts`](lib/constants.ts)). Other chains are on the roadmap.
 - Payment signing happens client-side. The proxy only forwards the HTTP hop, never touches keys, and is guarded against SSRF and abuse.
 
 ## License

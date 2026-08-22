@@ -6,7 +6,6 @@ import {
 import { ExactEvmScheme } from "@x402/evm/exact/client";
 import type { Network } from "@x402/core/types";
 import type { WalletClient } from "viem";
-import { NETWORK } from "./constants";
 
 export type RequestConfig = {
   url: string;
@@ -184,10 +183,11 @@ export async function probeX402(config: RequestConfig): Promise<ProbeResult> {
 export async function payX402(
   wallet: WalletClient,
   config: RequestConfig,
+  network: string,
 ): Promise<PayResult> {
   const signer = signerFromWallet(wallet);
   const client = new x402Client().register(
-    NETWORK as Network,
+    network as Network,
     new ExactEvmScheme(signer),
   );
 

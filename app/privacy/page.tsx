@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalShell title="Privacy Policy" updated="July 12, 2026">
+    <LegalShell title="Privacy Policy" updated="August 21, 2026">
       <p>
         Paywright is a free, open-source developer tool for testing x402
-        endpoints on testnet. This page explains, in plain language, what data
-        it does and does not handle. It is a summary for transparency, not legal
+        endpoints. This page explains, in plain language, what data it does
+        and does not handle. It is a summary for transparency, not legal
         advice.
       </p>
 
@@ -86,10 +86,12 @@ export default function PrivacyPage() {
         anything else, we will update this page.
       </p>
 
-      <h2>Testnet</h2>
+      <h2>Networks</h2>
       <p>
-        Paywright operates on the Base Sepolia testnet and does not handle real
-        funds.
+        Paywright lets you choose between Base Sepolia (testnet, no real
+        funds) and Base mainnet from the chain switcher. On mainnet, payments
+        use real USDC. We do not custody funds at any point on either network
+        — you sign each payment directly with your own wallet.
       </p>
 
       <h2>Changes</h2>

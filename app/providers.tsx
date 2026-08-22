@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { createAppKit } from "@reown/appkit/react";
 import { baseSepolia } from "@reown/appkit/networks";
-import { wagmiAdapter, projectId } from "@/lib/wagmi";
+import { wagmiAdapter, projectId, networks } from "@/lib/wagmi";
+import { ChainProvider } from "@/lib/chain-context";
 
 const metadata = {
   name: "Paywright",
@@ -14,11 +15,13 @@ const metadata = {
   icons: ["https://paywright.xyz/favicon.ico"],
 };
 
-// Create the AppKit modal once (dark, neon accent, wallet-only).
+// Create the AppKit modal once (dark, neon accent, wallet-only). Both
+// networks are offered; defaultNetwork is the safe one (testnet) — mainnet
+// is something the user opts into from the chain dropdown, never assumed.
 createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [baseSepolia],
+  networks,
   defaultNetwork: baseSepolia,
   metadata,
   themeMode: "dark",
@@ -39,7 +42,9 @@ export function Providers({
   const [queryClient] = useState(() => new QueryClient());
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <ChainProvider>{children}</ChainProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }

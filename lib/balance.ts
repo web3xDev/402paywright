@@ -1,6 +1,12 @@
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "viem/chains";
-import { USDC_ADDRESS } from "./constants";
+import { base, baseSepolia } from "viem/chains";
+import type { Chain as PaywrightChain } from "./constants";
+
+/** Maps our CHAINS rows to the matching viem chain object for RPC reads. */
+const VIEM_CHAINS: Record<string, typeof base | typeof baseSepolia> = {
+  "base-sepolia": baseSepolia,
+  base,
+};
 
 const USDC_BALANCE_ABI = [
   {
@@ -12,11 +18,15 @@ const USDC_BALANCE_ABI = [
   },
 ] as const;
 
-/** Read the wallet's USDC balance on Base Sepolia (base units, 6 decimals). */
-export async function readUsdcBalance(address: string): Promise<bigint> {
-  const client = createPublicClient({ chain: baseSepolia, transport: http() });
+/** Read the wallet's USDC balance on the given chain (base units, 6 decimals). */
+export async function readUsdcBalance(
+  address: string,
+  chain: PaywrightChain,
+): Promise<bigint> {
+  const viemChain = VIEM_CHAINS[chain.id] ?? baseSepolia;
+  const client = createPublicClient({ chain: viemChain, transport: http() });
   return client.readContract({
-    address: USDC_ADDRESS,
+    address: chain.usdcAddress,
     abi: USDC_BALANCE_ABI,
     functionName: "balanceOf",
     args: [address as `0x${string}`],

@@ -166,15 +166,19 @@ export function useMenuKeyboard({
       "aria-hidden": !open,
     } as const,
     /** Spread onto each item <button>; the component adds its own role
-     *  (menuitem / menuitemradio) plus key/onClick/className. */
+     *  (menuitem / menuitemradio) plus key/onClick/className.
+     *
+     *  Deliberately no onMouseEnter here: moving real DOM focus on hover
+     *  used to make the `focus:` highlight (meant for keyboard nav) stick
+     *  around after the mouse left the row, since nothing blurs it. Mouse
+     *  hover is left to plain CSS `:hover` — inherently transient, nothing
+     *  to get stuck. Keyboard users still get roving focus via the arrow
+     *  handlers above. */
     getItemProps: (index: number) => ({
       ref: (el: HTMLButtonElement | null) => {
         itemsRef.current[index] = el;
       },
       tabIndex: open && activeIndex === index ? 0 : -1,
-      onMouseEnter: () => {
-        if (isEnabled(index)) setActiveIndex(index);
-      },
     }),
   };
 }

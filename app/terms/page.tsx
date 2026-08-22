@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalShell title="Terms of Service" updated="July 12, 2026">
+    <LegalShell title="Terms of Service" updated="August 21, 2026">
       <p>
         By using Paywright, you agree to these terms. Paywright is a free,
         open-source developer tool provided as-is. This is a plain-language
@@ -18,8 +18,10 @@ export default function TermsPage() {
       <h2>What Paywright is</h2>
       <p>
         A tool to send requests to x402 endpoints, decode the 402 payment
-        challenge, pay in testnet USDC, and inspect the settled response. It runs
-        on the Base Sepolia testnet.
+        challenge, pay in USDC, and inspect the settled response. You choose
+        the network from the chain switcher: Base Sepolia (testnet) or Base
+        mainnet. Payments on mainnet use real USDC and are final — Paywright
+        cannot reverse or refund a signed payment.
       </p>
 
       <h2>No warranty</h2>

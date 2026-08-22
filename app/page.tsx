@@ -11,14 +11,8 @@ import {
   type PayResult,
   type RequestConfig,
 } from "@/lib/x402-client";
-import {
-  CHAIN_ID,
-  FAUCET_URL,
-  ACTIVE_CHAIN,
-  SAMPLE_ENDPOINTS,
-  EXPLORER_TX,
-  EXPLORER_ADDRESS,
-} from "@/lib/constants";
+import { FAUCET_URL, SAMPLE_ENDPOINTS } from "@/lib/constants";
+import { useChain } from "@/lib/chain-context";
 import { readUsdcBalance, formatUsdc } from "@/lib/balance";
 import {
   encodeRequestToParams,
@@ -173,6 +167,7 @@ function StatusBar({
 export default function Home() {
   const { address, chainId } = useConnection();
   const { data: walletClient } = useWalletClient();
+  const { chain } = useChain();
 
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("");
@@ -224,7 +219,7 @@ export default function Home() {
   }, [pay]);
 
   const connected = !!address;
-  const wrongChain = connected && chainId !== CHAIN_ID;
+  const wrongChain = connected && chainId !== chain.chainId;
 
   const config: RequestConfig = useMemo(() => {
     const headers: Record<string, string> = {};
@@ -247,27 +242,27 @@ export default function Home() {
   // changes mid-flight.
   const balReqRef = useRef(0);
   const refreshBalance = useCallback(() => {
-    if (!address || chainId !== CHAIN_ID) {
+    if (!address || chainId !== chain.chainId) {
       setBalance(null);
       return;
     }
     const token = ++balReqRef.current;
-    readUsdcBalance(address)
+    readUsdcBalance(address, chain)
       .then((b) => token === balReqRef.current && setBalance(b))
       .catch(() => token === balReqRef.current && setBalance(null));
-  }, [address, chainId]);
+  }, [address, chainId, chain]);
 
   // After a settled payment the public RPC can lag a beat before it reflects
   // the debit, so poll until the balance actually changes (or we give up).
   const pollBalanceAfterPay = useCallback(
     async (before: bigint | null) => {
-      if (!address || chainId !== CHAIN_ID) return;
+      if (!address || chainId !== chain.chainId) return;
       const token = ++balReqRef.current;
       for (let i = 0; i < 6; i++) {
         await new Promise((res) => setTimeout(res, i === 0 ? 800 : 1500));
         if (token !== balReqRef.current) return; // superseded (e.g. account switch)
         try {
-          const b = await readUsdcBalance(address);
+          const b = await readUsdcBalance(address, chain);
           if (token !== balReqRef.current) return;
           setBalance(b);
           if (before == null || b !== before) return; // debit is now visible
@@ -276,7 +271,7 @@ export default function Home() {
         }
       }
     },
-    [address, chainId],
+    [address, chainId, chain],
   );
 
   // On account switch, drop the previous account's balance immediately so we
@@ -367,7 +362,7 @@ export default function Home() {
         // or other testnets we may activate later. Stack the link under the
         // message (JSX content) rather than the side-by-side action button.
         toast.error(
-          ACTIVE_CHAIN.id === "base-sepolia" ? (
+          chain.testnet ? (
             <div className="flex flex-col gap-1.5">
               <span>{msg}</span>
               <a
@@ -391,7 +386,7 @@ export default function Home() {
     setPaying(true);
     const t0 = Date.now();
     try {
-      const r = await payX402(walletClient, config);
+      const r = await payX402(walletClient, config, chain.network);
       setPayMs(Date.now() - t0);
       setPay(r);
       if (r.ok) {
@@ -443,7 +438,7 @@ export default function Home() {
             <h1 className="text-lg font-semibold tracking-tight min-[350px]:text-xl">
               Test any <span className="text-accent">x402</span> endpoint
             </h1>
-            {ACTIVE_CHAIN.testnet && (
+            {chain.testnet && (
               <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-0.5 font-mono text-[10px] text-accent-2 min-[350px]:gap-1.5 min-[350px]:px-2.5 min-[350px]:py-1 min-[350px]:text-xs">
                 <span className="h-1 w-1 rounded-full bg-accent-2 min-[350px]:h-1.5 min-[350px]:w-1.5" />
                 testnet
@@ -700,7 +695,7 @@ export default function Home() {
                   label="pay to"
                   value={req.payTo && short(req.payTo)}
                   full={req.payTo ?? undefined}
-                  href={req.payTo ? `${EXPLORER_ADDRESS}${req.payTo}` : undefined}
+                  href={req.payTo ? `${chain.explorer}/address/${req.payTo}` : undefined}
                   copy={req.payTo ?? undefined}
                   mono
                 />
@@ -708,7 +703,7 @@ export default function Home() {
                   label="asset"
                   value={req.asset && short(req.asset)}
                   full={req.asset ?? undefined}
-                  href={req.asset ? `${EXPLORER_ADDRESS}${req.asset}` : undefined}
+                  href={req.asset ? `${chain.explorer}/address/${req.asset}` : undefined}
                   copy={req.asset ?? undefined}
                   mono
                 />
@@ -776,7 +771,7 @@ export default function Home() {
                   </span>
                 ) : wrongChain ? (
                   <span className="text-sm text-accent-2">
-                    Switch to Base Sepolia to pay.
+                    Switch to {chain.label} to pay.
                   </span>
                 ) : (
                   <button
@@ -790,14 +785,16 @@ export default function Home() {
                     {paying ? "Signing & settling…" : "Pay & unlock →"}
                   </button>
                 )}
-                <a
-                  href={FAUCET_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-muted underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline"
-                >
-                  Need testnet USDC?
-                </a>
+                {chain.testnet && (
+                  <a
+                    href={FAUCET_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-muted underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline"
+                  >
+                    Need testnet USDC?
+                  </a>
+                )}
                 {connected && !wrongChain && balance != null && (
                   <span className="text-xs text-muted">
                     Balance:{" "}
@@ -835,7 +832,7 @@ export default function Home() {
                 {txHash && (
                   <div className="mb-3 flex items-center gap-2">
                     <a
-                      href={`${EXPLORER_TX}${txHash}`}
+                      href={`${chain.explorer}/tx/${txHash}`}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-accent transition-colors duration-150 hover:border-accent/50"
